@@ -81,7 +81,7 @@ Antes de começar, certifique-se de ter instalado:
 
 ```bash
 git clone <https://github.com/TCC-RagBot/RagBot-Back.git>
-cd backend
+cd RagBot-Back
 ```
 
 ### **2️⃣ Configurar Ambiente Virtual**
@@ -126,12 +126,6 @@ cp .env.example .env
 ```
 
 **Editar arquivo `.env`** com suas configurações:
-
-> 🔑 **Como obter Google Gemini API Key:**
-> 1. Acesse [Google AI Studio](https://ai.google.dev/)
-> 2. Faça login com sua conta Google
-> 3. Clique em "Get API Key"
-> 4. Copie a chave e cole no arquivo `.env`
 
 ### **5️⃣ Configurar Banco de Dados**
 
