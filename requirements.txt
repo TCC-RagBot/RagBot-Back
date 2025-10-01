@@ -1,50 +1,46 @@
-# FastAPI and ASGI server
-fastapi==0.115.0
+# ========================================
+# RAGBot Backend - Requirements
+# Python 3.11+ Compatible Versions
+# ========================================
+
+# FastAPI Web Framework
+fastapi==0.115.4
 uvicorn[standard]==0.32.0
 
-# Database
+# Database & Vector Store
 psycopg2-binary==2.9.9
-sqlalchemy==2.0.36
-alembic==1.14.0
-
-# Vector database extension
+sqlalchemy==2.0.35
 pgvector==0.3.6
 
-# LangChain ecosystem
+# LangChain RAG Framework
 langchain==0.3.7
 langchain-community==0.3.7
 langchain-google-genai==2.0.5
 
-# Document processing
+# AI & Embeddings (Stable Versions)
+google-generativeai==0.8.3
+sentence-transformers==3.3.1
+
+# Document Processing
 pypdf==5.1.0
 python-multipart==0.0.12
 
-# Embeddings - versão compatível com Python 3.13
-sentence-transformers==3.3.1
-
-# Google Gemini AI
-google-generativeai==0.8.3
-
-# Environment variables
+# Configuration & Environment
 python-dotenv==1.0.1
-
-# Data validation
 pydantic==2.10.3
 pydantic-settings==2.6.1
 
-# HTTP client
+# HTTP & Networking
 httpx==0.28.1
 
-# Utils - versões compatíveis com LangChain
-numpy>=1.26.0,<2.0.0
-pandas==2.2.3
+# Scientific Computing (LangChain Compatible)
+# LangChain requires numpy < 2.0.0 - using latest compatible
+numpy==1.26.4
 
 # Logging
 loguru==0.7.2
 
-# Development
+# Development Tools (Optional)
 pytest==8.3.4
 pytest-asyncio==0.24.0
 black==24.10.0
-flake8==7.1.1
-mypy==1.13.0
