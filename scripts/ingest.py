@@ -181,7 +181,7 @@ def main():
         description="Ingest PDF documents into RAGBot database"
     )
     
-    group = parser.add_mutually_exclusive_group(required=True)
+    group = parser.add_mutually_exclusive_group(required=False)
     group.add_argument(
         "--pdf-path",
         type=str,
@@ -190,7 +190,8 @@ def main():
     group.add_argument(
         "--pdf-folder", 
         type=str,
-        help="Path to folder containing PDF files to process"
+        default=settings.documents_folder,
+        help=f"Path to folder containing PDF files to process (default: {settings.documents_folder})"
     )
     
     parser.add_argument(
@@ -226,9 +227,11 @@ def main():
             document_id = ingest_service.process_pdf_file(args.pdf_path)
             logger.success(f"Document created with ID: {document_id}")
             
-        elif args.pdf_folder:
-            logger.info(f"Processing PDF folder: {args.pdf_folder}")
-            document_ids = ingest_service.process_pdf_folder(args.pdf_folder)
+        else:
+            # Se não especificou arquivo nem pasta, usa a pasta padrão
+            folder_to_process = args.pdf_folder
+            logger.info(f"Processing PDF folder: {folder_to_process}")
+            document_ids = ingest_service.process_pdf_folder(folder_to_process)
             logger.success(f"Created {len(document_ids)} documents")
             
             if document_ids:

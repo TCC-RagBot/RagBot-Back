@@ -91,7 +91,7 @@ class HealthResponse(BaseModel):
         database_status: Status da conexão com o banco
     """
     status: str = Field(..., description="Status da aplicação")
-    timestamp: datetime = Field(..., description="Timestamp da verificação")
+    timestamp: str = Field(..., description="Timestamp da verificação")
     version: str = Field(..., description="Versão da aplicação")
     database_status: str = Field(..., description="Status do banco de dados")
 
@@ -107,4 +107,4 @@ class ErrorResponse(BaseModel):
     """
     error: str = Field(..., description="Mensagem de erro")
     detail: Optional[str] = Field(None, description="Detalhes do erro")
-    timestamp: datetime = Field(default_factory=datetime.now, description="Timestamp do erro")
+    timestamp: str = Field(default_factory=lambda: datetime.now().isoformat(), description="Timestamp do erro")

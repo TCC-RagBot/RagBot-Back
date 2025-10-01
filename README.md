@@ -12,7 +12,7 @@ O RAGBot é um sistema que permite ingestão de documentos PDF e chat interativo
 - **PostgreSQL + pgvector**: Banco de dados com suporte a operações vetoriais
 - **LangChain**: Orquestração de IA e processamento de documentos
 - **sentence-transformers**: Geração de embeddings (all-MiniLM-L6-v2)
-- **OpenAI API**: Geração de respostas (GPT-3.5+)
+- **Google Gemini API**: Geração de respostas (Gemini Pro)
 
 ## 📁 Estrutura do Projeto
 
@@ -26,6 +26,9 @@ backend/
 │
 ├── db/
 │   └── init.sql        # Schema do banco de dados
+│
+├── documents/          # Pasta para arquivos PDF (criada automaticamente)
+│   └── README.md       # Instruções da pasta
 │
 ├── app/                # Módulo principal da aplicação
 │   ├── __init__.py     # Inicialização do módulo
@@ -65,8 +68,8 @@ pip install -r requirements.txt
 copy .env.example .env
 
 # Editar .env com suas configurações:
-# - DATABASE_URL: String de conexão PostgreSQL
-# - OPENAI_API_KEY: Sua chave da API OpenAI
+# - DATABASE_URL: String de conexão PostgreSQL (já configurada para Docker)
+# - GEMINI_API_KEY: Sua chave da API Google Gemini
 # - Outras configurações conforme necessário
 ```
 
@@ -99,15 +102,20 @@ A API estará disponível em: http://localhost:8000
 ### Ingestão de Documentos (Offline)
 
 ```bash
-# Processar um único PDF
+# COMANDO PADRÃO: Processar todos PDFs da pasta 'documents/'
+python scripts/ingest.py
+
+# Processar um único PDF específico
 python scripts/ingest.py --pdf-path caminho/para/documento.pdf
 
-# Processar todos PDFs de uma pasta
+# Processar todos PDFs de uma pasta específica
 python scripts/ingest.py --pdf-folder caminho/para/pasta/
 
 # Com logging detalhado
-python scripts/ingest.py --pdf-path documento.pdf --verbose
+python scripts/ingest.py --verbose
 ```
+
+**💡 Dica**: Basta colocar seus PDFs na pasta `documents/` e executar `python scripts/ingest.py` - é o jeito mais simples!
 
 ### Endpoints da API
 
@@ -153,7 +161,7 @@ file: [arquivo.pdf]
    - PDF → Extração de texto → Chunks → Embeddings → PostgreSQL
 
 2. **Chat** (Online):
-   - Pergunta → Embedding → Busca similaridade → Chunks relevantes → Prompt → OpenAI → Resposta
+   - Pergunta → Embedding → Busca similaridade → Chunks relevantes → Prompt → Gemini → Resposta
 
 ## 📋 Schema do Banco
 

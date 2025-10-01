@@ -26,8 +26,8 @@ class Settings(BaseSettings):
     # Configurações do banco de dados
     database_url: str
     
-    # Configurações da OpenAI
-    openai_api_key: str
+    # Configurações da Gemini AI
+    gemini_api_key: str
     
     # Configurações do modelo de embedding
     embedding_model_name: str = "all-MiniLM-L6-v2"
@@ -46,6 +46,9 @@ class Settings(BaseSettings):
     
     # Configurações de logging
     log_level: str = "INFO"
+    
+    # Configurações de documentos
+    documents_folder: str = "documents"
     
     class Config:
         """Configuração do Pydantic Settings."""

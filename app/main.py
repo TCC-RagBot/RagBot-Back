@@ -69,7 +69,7 @@ async def not_found_handler(request, exc):
         content=ErrorResponse(
             error="Endpoint não encontrado",
             detail=f"O endpoint {request.url.path} não existe"
-        ).dict()
+        ).model_dump()
     )
 
 
@@ -82,7 +82,7 @@ async def internal_error_handler(request, exc):
         content=ErrorResponse(
             error="Erro interno do servidor",
             detail="Ocorreu um erro inesperado. Tente novamente mais tarde."
-        ).dict()
+        ).model_dump()
     )
 
 
@@ -116,7 +116,7 @@ async def health_check():
         
         return HealthResponse(
             status="healthy" if db_status == "healthy" else "degraded",
-            timestamp=datetime.now(),
+            timestamp=datetime.now().isoformat(),
             version=settings.app_version,
             database_status=db_status
         )
@@ -124,7 +124,7 @@ async def health_check():
         logger.error(f"Health check failed: {e}")
         return HealthResponse(
             status="unhealthy",
-            timestamp=datetime.now(),
+            timestamp=datetime.now().isoformat(),
             version=settings.app_version,
             database_status="error"
         )

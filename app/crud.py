@@ -7,6 +7,7 @@ Utiliza SQLAlchemy para interação com PostgreSQL e pgvector para operações v
 """
 
 import uuid
+import json
 from typing import List, Optional, Dict, Any, Tuple
 from datetime import datetime
 from sqlalchemy import create_engine, text, select, insert, update, delete
@@ -72,15 +73,14 @@ class DatabaseManager:
             try:
                 document_id = uuid.uuid4()
                 query = text("""
-                    INSERT INTO documents (id, filename, content, metadata, created_at)
-                    VALUES (:id, :filename, :content, :metadata, :created_at)
+                    INSERT INTO documents (id, file_name, metadata, created_at)
+                    VALUES (:id, :file_name, :metadata, :created_at)
                 """)
                 
                 session.execute(query, {
                     'id': document_id,
-                    'filename': filename,
-                    'content': content,
-                    'metadata': metadata or {},
+                    'file_name': filename,
+                    'metadata': json.dumps(metadata or {}),
                     'created_at': datetime.now()
                 })
                 
@@ -112,8 +112,8 @@ class DatabaseManager:
             try:
                 chunk_id = uuid.uuid4()
                 query = text("""
-                    INSERT INTO chunks (id, document_id, content, embedding, page_number, metadata, created_at)
-                    VALUES (:id, :document_id, :content, :embedding, :page_number, :metadata, :created_at)
+                    INSERT INTO chunks (id, document_id, content, embedding, created_at)
+                    VALUES (:id, :document_id, :content, :embedding, :created_at)
                 """)
                 
                 session.execute(query, {
@@ -121,8 +121,6 @@ class DatabaseManager:
                     'document_id': document_id,
                     'content': content,
                     'embedding': embedding,
-                    'page_number': page_number,
-                    'metadata': metadata or {},
                     'created_at': datetime.now()
                 })
                 
@@ -152,9 +150,7 @@ class DatabaseManager:
                     SELECT 
                         c.id,
                         c.content,
-                        c.page_number,
-                        c.metadata,
-                        d.filename,
+                        d.file_name,
                         1 - (c.embedding <=> :query_embedding) as similarity_score
                     FROM chunks c
                     JOIN documents d ON c.document_id = d.id
@@ -172,9 +168,7 @@ class DatabaseManager:
                     chunks.append({
                         'chunk_id': row.id,
                         'content': row.content,
-                        'page_number': row.page_number,
-                        'metadata': row.metadata,
-                        'document_name': row.filename,
+                        'document_name': row.file_name,
                         'similarity_score': float(row.similarity_score)
                     })
                 

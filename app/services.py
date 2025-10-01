@@ -11,9 +11,8 @@ import uuid
 from typing import List, Dict, Any, Optional, Tuple
 from sentence_transformers import SentenceTransformer
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.llms import OpenAI
-from langchain.schema import HumanMessage, SystemMessage
-from openai import OpenAI as OpenAIClient
+from langchain_google_genai import ChatGoogleGenerativeAI
+import google.generativeai as genai
 from loguru import logger
 
 from .config import settings
@@ -147,8 +146,10 @@ class ChatService:
     def __init__(self):
         """Inicializa o serviço de chat."""
         self.embedding_service = EmbeddingService()
-        self.openai_client = OpenAIClient(api_key=settings.openai_api_key)
-        logger.info("Chat service initialized")
+        # Configurar Gemini
+        genai.configure(api_key=settings.gemini_api_key)
+        self.model = genai.GenerativeModel('gemini-pro')
+        logger.info("Chat service initialized with Gemini")
     
     def _build_prompt(self, user_question: str, relevant_chunks: List[Dict[str, Any]]) -> str:
         """
@@ -219,15 +220,9 @@ RESPOSTA:"""
                 # Construir prompt
                 prompt = self._build_prompt(user_message, relevant_chunks)
                 
-                # Gerar resposta com OpenAI
-                response = self.openai_client.chat.completions.create(
-                    model="gpt-3.5-turbo",
-                    messages=[{"role": "user", "content": prompt}],
-                    max_tokens=1000,
-                    temperature=0.1
-                )
-                
-                response_text = response.choices[0].message.content
+                # Gerar resposta com Gemini
+                response = self.model.generate_content(prompt)
+                response_text = response.text
                 
                 # Preparar chunks de origem
                 source_chunks = [
