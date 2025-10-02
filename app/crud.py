@@ -184,7 +184,7 @@ class DatabaseManager:
         Cria uma nova conversa.
         
         Args:
-            user_id: ID do usuário (opcional)
+            user_id: ID do usuário (opcional - não utilizado no schema atual)
             
         Returns:
             UUID: ID da conversa criada
@@ -193,13 +193,12 @@ class DatabaseManager:
             try:
                 conversation_id = uuid.uuid4()
                 query = text("""
-                    INSERT INTO conversations (id, user_id, created_at)
-                    VALUES (:id, :user_id, :created_at)
+                    INSERT INTO conversations (id, created_at)
+                    VALUES (:id, :created_at)
                 """)
                 
                 session.execute(query, {
                     'id': conversation_id,
-                    'user_id': user_id,
                     'created_at': datetime.now()
                 })
                 
@@ -215,7 +214,7 @@ class DatabaseManager:
     def create_message(self, conversation_id: uuid.UUID, user_message: str, 
                       assistant_response: str, source_chunks: List[uuid.UUID]) -> uuid.UUID:
         """
-        Cria uma nova mensagem na conversa.
+        Cria mensagens na conversa (user + assistant).
         
         Args:
             conversation_id: ID da conversa
@@ -224,43 +223,55 @@ class DatabaseManager:
             source_chunks: Lista de IDs dos chunks utilizados como fonte
             
         Returns:
-            UUID: ID da mensagem criada
+            UUID: ID da mensagem do assistente
         """
         with self.get_session() as session:
             try:
-                message_id = uuid.uuid4()
-                
-                # Criar a mensagem
-                message_query = text("""
-                    INSERT INTO messages (id, conversation_id, user_message, assistant_response, created_at)
-                    VALUES (:id, :conversation_id, :user_message, :assistant_response, :created_at)
+                # Criar mensagem do usuário
+                user_message_id = uuid.uuid4()
+                user_query = text("""
+                    INSERT INTO messages (id, conversation_id, role, content, created_at)
+                    VALUES (:id, :conversation_id, :role, :content, :created_at)
                 """)
                 
-                session.execute(message_query, {
-                    'id': message_id,
+                session.execute(user_query, {
+                    'id': user_message_id,
                     'conversation_id': conversation_id,
-                    'user_message': user_message,
-                    'assistant_response': assistant_response,
+                    'role': 'user',
+                    'content': user_message,
                     'created_at': datetime.now()
                 })
                 
-                # Criar as relações com os chunks
+                # Criar mensagem do assistente
+                assistant_message_id = uuid.uuid4()
+                assistant_query = text("""
+                    INSERT INTO messages (id, conversation_id, role, content, created_at)
+                    VALUES (:id, :conversation_id, :role, :content, :created_at)
+                """)
+                
+                session.execute(assistant_query, {
+                    'id': assistant_message_id,
+                    'conversation_id': conversation_id,
+                    'role': 'assistant',
+                    'content': assistant_response,
+                    'created_at': datetime.now()
+                })
+                
+                # Criar as relações com os chunks (apenas para mensagem do assistente)
                 for chunk_id in source_chunks:
                     source_query = text("""
-                        INSERT INTO message_source_chunks (id, message_id, chunk_id, created_at)
-                        VALUES (:id, :message_id, :chunk_id, :created_at)
+                        INSERT INTO message_source_chunks (message_id, chunk_id)
+                        VALUES (:message_id, :chunk_id)
                     """)
                     
                     session.execute(source_query, {
-                        'id': uuid.uuid4(),
-                        'message_id': message_id,
-                        'chunk_id': chunk_id,
-                        'created_at': datetime.now()
+                        'message_id': assistant_message_id,
+                        'chunk_id': chunk_id
                     })
                 
                 session.commit()
-                logger.info(f"Message created with ID: {message_id}")
-                return message_id
+                logger.info(f"Messages created - User: {user_message_id}, Assistant: {assistant_message_id}")
+                return assistant_message_id
                 
             except Exception as e:
                 session.rollback()

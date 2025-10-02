@@ -149,7 +149,12 @@ class ChatService:
         # Configurar Gemini
         genai.configure(api_key=settings.gemini_api_key)
         self.model = genai.GenerativeModel('gemini-pro')
-        logger.info("Chat service initialized with Gemini")
+        
+        # Inicializar LangChain vector store
+        from .langchain_vector import get_vector_store
+        self.vector_store = get_vector_store()
+        
+        logger.info("Chat service initialized with Gemini and LangChain")
     
     def _build_prompt(self, user_question: str, relevant_chunks: List[Dict[str, Any]]) -> str:
         """
@@ -205,12 +210,9 @@ RESPOSTA:"""
             if not conversation_id:
                 conversation_id = db_manager.create_conversation()
             
-            # Gerar embedding da pergunta
-            query_embedding = self.embedding_service.encode_text(user_message)
-            
-            # Buscar chunks relevantes
+            # Buscar chunks relevantes usando LangChain PostgreSQL
             chunk_limit = max_chunks or settings.max_chunks_retrieved
-            relevant_chunks = db_manager.similarity_search(query_embedding, limit=chunk_limit)
+            relevant_chunks = self.vector_store.similarity_search_with_score(user_message, k=chunk_limit)
             
             if not relevant_chunks:
                 logger.warning("No relevant chunks found for query")
