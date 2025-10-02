@@ -20,8 +20,8 @@ from .schemas import (
     ChatRequest, ChatResponse, DocumentUploadResponse, 
     HealthResponse, ErrorResponse
 )
-from .services import chat_service, document_processing_service
 from .crud import db_manager
+from .services import chat_service
 
 
 # Configuração da aplicação FastAPI

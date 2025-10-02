@@ -31,13 +31,11 @@ class SourceChunk(BaseModel):
     Schema para chunks de origem utilizados na resposta.
     
     Attributes:
-        chunk_id: ID único do chunk
         content: Conteúdo do chunk
         document_name: Nome do documento de origem
         page_number: Número da página (se aplicável)
         similarity_score: Score de similaridade com a pergunta
     """
-    chunk_id: UUID = Field(..., description="ID único do chunk")
     content: str = Field(..., description="Conteúdo do chunk")
     document_name: str = Field(..., description="Nome do documento")
     page_number: Optional[int] = Field(None, description="Número da página")
