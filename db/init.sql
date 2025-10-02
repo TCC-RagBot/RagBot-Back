@@ -1,27 +1,12 @@
-CREATE EXTENSION IF NOT EXISTS vector;
-
-CREATE TABLE documents (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    file_name TEXT NOT NULL,
-    metadata JSONB,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE TABLE chunks (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    document_id UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
-    content TEXT NOT NULL,
-    embedding vector(384) NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp"; 
 
 CREATE TABLE conversations (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE messages (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
     role TEXT NOT NULL CHECK (role IN ('user', 'assistant')),
     content TEXT NOT NULL,
@@ -30,9 +15,8 @@ CREATE TABLE messages (
 
 CREATE TABLE message_source_chunks (
     message_id UUID NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
-    chunk_id UUID NOT NULL REFERENCES chunks(id) ON DELETE CASCADE,
-    PRIMARY KEY (message_id, chunk_id)
+    chunk_content TEXT NOT NULL,
+    document_name TEXT NOT NULL,
+    similarity_score FLOAT,
+    PRIMARY KEY (message_id, chunk_content)
 );
-
--- Cria um índice HNSW para a busca por similaridade de cosseno.
-CREATE INDEX ON chunks USING hnsw (embedding vector_cosine_ops);

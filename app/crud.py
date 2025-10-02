@@ -1,54 +1,39 @@
 """
-Funções CRUD para interação com o banco de dados PostgreSQL.
+Operações mínimas de banco de dados para conversas e mensagens.
 
-Este módulo contém todas as operações de banco de dados para o sistema RAGBot,
-incluindo operações para documentos, chunks, conversas e mensagens.
-Utiliza SQLAlchemy para interação com PostgreSQL e pgvector para operações vetoriais.
+Este módulo contém apenas as operações essenciais que não são cobertas
+pelo LangChain, focando em conversas e mensagens do sistema de chat.
 """
 
 import uuid
-import json
-from typing import List, Optional, Dict, Any, Tuple
+from typing import List, Optional
 from datetime import datetime
-from sqlalchemy import create_engine, text, select, insert, update, delete
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.dialects.postgresql import UUID, ARRAY
-import numpy as np
 from loguru import logger
 
 from .config import settings
 
 
-class DatabaseManager:
+class MinimalDatabaseManager:
     """
-    Gerenciador de conexões e operações com o banco de dados.
+    Gerenciador minimalista para operações de conversa e mensagens.
     
-    Responsável por todas as operações CRUD e queries vetoriais
-    necessárias para o funcionamento do sistema RAG.
+    Operações de documentos e chunks são gerenciadas pelo LangChain.
     """
     
     def __init__(self):
         """Inicializa o gerenciador do banco de dados."""
         self.engine = create_engine(settings.database_url)
         self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
-        logger.info("Database manager initialized")
+        logger.info("Minimal database manager initialized")
     
     def get_session(self) -> Session:
-        """
-        Cria uma nova sessão do banco de dados.
-        
-        Returns:
-            Session: Sessão do SQLAlchemy
-        """
+        """Cria uma nova sessão do banco de dados."""
         return self.SessionLocal()
     
     def test_connection(self) -> bool:
-        """
-        Testa a conexão com o banco de dados.
-        
-        Returns:
-            bool: True se a conexão for bem-sucedida
-        """
+        """Testa a conexão com o banco de dados."""
         try:
             with self.engine.connect() as conn:
                 conn.execute(text("SELECT 1"))
@@ -57,138 +42,8 @@ class DatabaseManager:
             logger.error(f"Database connection failed: {e}")
             return False
     
-    def create_document(self, filename: str, content: str, metadata: Dict[str, Any] = None) -> uuid.UUID:
-        """
-        Cria um novo documento no banco de dados.
-        
-        Args:
-            filename: Nome do arquivo
-            content: Conteúdo completo do documento
-            metadata: Metadados adicionais do documento
-            
-        Returns:
-            UUID: ID do documento criado
-        """
-        with self.get_session() as session:
-            try:
-                document_id = uuid.uuid4()
-                query = text("""
-                    INSERT INTO documents (id, file_name, metadata, created_at)
-                    VALUES (:id, :file_name, :metadata, :created_at)
-                """)
-                
-                session.execute(query, {
-                    'id': document_id,
-                    'file_name': filename,
-                    'metadata': json.dumps(metadata or {}),
-                    'created_at': datetime.now()
-                })
-                
-                session.commit()
-                logger.info(f"Document created with ID: {document_id}")
-                return document_id
-                
-            except Exception as e:
-                session.rollback()
-                logger.error(f"Error creating document: {e}")
-                raise
-    
-    def create_chunk(self, document_id: uuid.UUID, content: str, embedding: List[float], 
-                    page_number: Optional[int] = None, metadata: Dict[str, Any] = None) -> uuid.UUID:
-        """
-        Cria um novo chunk no banco de dados.
-        
-        Args:
-            document_id: ID do documento pai
-            content: Conteúdo do chunk
-            embedding: Vetor de embedding do chunk
-            page_number: Número da página (opcional)
-            metadata: Metadados adicionais
-            
-        Returns:
-            UUID: ID do chunk criado
-        """
-        with self.get_session() as session:
-            try:
-                chunk_id = uuid.uuid4()
-                query = text("""
-                    INSERT INTO chunks (id, document_id, content, embedding, created_at)
-                    VALUES (:id, :document_id, :content, :embedding, :created_at)
-                """)
-                
-                session.execute(query, {
-                    'id': chunk_id,
-                    'document_id': document_id,
-                    'content': content,
-                    'embedding': embedding,
-                    'created_at': datetime.now()
-                })
-                
-                session.commit()
-                logger.debug(f"Chunk created with ID: {chunk_id}")
-                return chunk_id
-                
-            except Exception as e:
-                session.rollback()
-                logger.error(f"Error creating chunk: {e}")
-                raise
-    
-    def similarity_search(self, query_embedding: List[float], limit: int = 5) -> List[Dict[str, Any]]:
-        """
-        Realiza busca por similaridade vetorial.
-        
-        Args:
-            query_embedding: Vetor de embedding da query
-            limit: Número máximo de resultados
-            
-        Returns:
-            List[Dict]: Lista de chunks similares com scores
-        """
-        with self.get_session() as session:
-            try:
-                query = text("""
-                    SELECT 
-                        c.id,
-                        c.content,
-                        d.file_name,
-                        1 - (c.embedding <=> :query_embedding) as similarity_score
-                    FROM chunks c
-                    JOIN documents d ON c.document_id = d.id
-                    ORDER BY c.embedding <=> :query_embedding
-                    LIMIT :limit
-                """)
-                
-                result = session.execute(query, {
-                    'query_embedding': query_embedding,
-                    'limit': limit
-                })
-                
-                chunks = []
-                for row in result:
-                    chunks.append({
-                        'chunk_id': row.id,
-                        'content': row.content,
-                        'document_name': row.file_name,
-                        'similarity_score': float(row.similarity_score)
-                    })
-                
-                logger.debug(f"Found {len(chunks)} similar chunks")
-                return chunks
-                
-            except Exception as e:
-                logger.error(f"Error in similarity search: {e}")
-                raise
-    
     def create_conversation(self, user_id: Optional[str] = None) -> uuid.UUID:
-        """
-        Cria uma nova conversa.
-        
-        Args:
-            user_id: ID do usuário (opcional - não utilizado no schema atual)
-            
-        Returns:
-            UUID: ID da conversa criada
-        """
+        """Cria uma nova conversa."""
         with self.get_session() as session:
             try:
                 conversation_id = uuid.uuid4()
@@ -212,19 +67,8 @@ class DatabaseManager:
                 raise
     
     def create_message(self, conversation_id: uuid.UUID, user_message: str, 
-                      assistant_response: str, source_chunks: List[uuid.UUID]) -> uuid.UUID:
-        """
-        Cria mensagens na conversa (user + assistant).
-        
-        Args:
-            conversation_id: ID da conversa
-            user_message: Mensagem do usuário
-            assistant_response: Resposta do assistente
-            source_chunks: Lista de IDs dos chunks utilizados como fonte
-            
-        Returns:
-            UUID: ID da mensagem do assistente
-        """
+                      assistant_response: str, source_chunks: List = None) -> uuid.UUID:
+        """Cria mensagens na conversa (user + assistant)."""
         with self.get_session() as session:
             try:
                 # Criar mensagem do usuário
@@ -257,18 +101,6 @@ class DatabaseManager:
                     'created_at': datetime.now()
                 })
                 
-                # Criar as relações com os chunks (apenas para mensagem do assistente)
-                for chunk_id in source_chunks:
-                    source_query = text("""
-                        INSERT INTO message_source_chunks (message_id, chunk_id)
-                        VALUES (:message_id, :chunk_id)
-                    """)
-                    
-                    session.execute(source_query, {
-                        'message_id': assistant_message_id,
-                        'chunk_id': chunk_id
-                    })
-                
                 session.commit()
                 logger.info(f"Messages created - User: {user_message_id}, Assistant: {assistant_message_id}")
                 return assistant_message_id
@@ -279,5 +111,5 @@ class DatabaseManager:
                 raise
 
 
-# Instância global do gerenciador de banco
-db_manager = DatabaseManager()
+# Instância global do gerenciador minimalista
+db_manager = MinimalDatabaseManager()

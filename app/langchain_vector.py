@@ -94,7 +94,7 @@ class LangChainVectorStore:
                 formatted_results.append({
                     'chunk_id': doc.metadata.get('chunk_id'),
                     'content': doc.page_content,
-                    'document_name': doc.metadata.get('document_name'),
+                    'document_name': doc.metadata.get('file_name', 'Documento desconhecido'),
                     'similarity_score': 1 - score,  # Converter distance para similarity
                     'metadata': doc.metadata
                 })
