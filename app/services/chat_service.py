@@ -15,9 +15,10 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 import google.generativeai as genai
 from loguru import logger
 
-from .config import settings
-from .crud import db_manager
-from .schemas import ChatResponse, SourceChunk
+from ..config.settings import settings
+from ..repositories.conversation_repository import db_manager
+from ..repositories.vector_repository import get_vector_store
+from ..schemas.chat import ChatResponse, SourceChunk
 
 
 class ChatService:
@@ -35,7 +36,6 @@ class ChatService:
         self.model = genai.GenerativeModel('gemini-2.5-flash')
         
         # Inicializar LangChain vector store
-        from .langchain_vector import get_vector_store
         self.vector_store = get_vector_store()
         
         logger.info("Chat service initialized with Gemini and LangChain")

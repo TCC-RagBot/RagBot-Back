@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     """
     
     # Configurações da aplicação
-    app_name: str = "RAGBot"
+    app_name: str = "aaa"
     app_version: str = "1.0.0"
     debug: bool = False
     

@@ -13,7 +13,7 @@ from langchain_core.embeddings import Embeddings
 import numpy as np
 from loguru import logger
 
-from .config import settings
+from ..config.settings import settings
 
 
 class SentenceTransformerEmbeddings(Embeddings):
