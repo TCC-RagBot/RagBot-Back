@@ -56,11 +56,19 @@ backend/
 │
 ├── app/                # Módulo principal da aplicação
 │   ├── __init__.py     # Inicialização do módulo
-│   ├── main.py         # Aplicação FastAPI e endpoints
-│   ├── config.py       # Configurações e variáveis de ambiente
-│   ├── schemas.py      # Modelos Pydantic para API
-│   ├── crud.py         # Operações de banco de dados
-│   └── services.py     # Lógica de negócio (RAG, embeddings, etc.)
+│   ├── main.py         # Entry point da aplicação FastAPI
+│   ├── config/         # Configurações
+│   │   └── settings.py # Configurações e variáveis de ambiente
+│   ├── api/            # Camada de apresentação
+│   │   └── routes/
+│   │       └── chat.py # Endpoints da API
+│   ├── schemas/        # Modelos Pydantic
+│   │   └── chat.py     # Schemas para requests/responses
+│   ├── services/       # Lógica de negócio
+│   │   └── chat_service.py # Serviço principal do RAG
+│   └── repositories/   # Camada de dados
+│       ├── conversation_repository.py # Operações de banco
+│       └── vector_repository.py       # Busca vetorial
 │
 └── scripts/            # Scripts offline
     ├── __init__.py
@@ -151,8 +159,9 @@ O banco será inicializado automaticamente com:
 ```bash
 # IMPORTANTE: Certifique-se de que o ambiente virtual está ativo!
 
-# Iniciar servidor de desenvolvimento
-python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+# Método 1: Execução direta (RECOMENDADO)
+python -m app.main
+
 ```
 
 ✅ **API funcionando!** Acesse:
