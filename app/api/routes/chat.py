@@ -6,8 +6,6 @@ organizados por funcionalidade.
 """
 
 import uuid
-import time
-from typing import Optional
 from fastapi import APIRouter, HTTPException, status, File, UploadFile
 from datetime import datetime
 from loguru import logger
@@ -16,7 +14,7 @@ from ...config.settings import settings
 from ...config.constants import APP_NAME, APP_VERSION
 from ...schemas.chat import (
     ChatRequest, ChatResponse, DocumentUploadResponse, 
-    HealthResponse, ErrorResponse
+    HealthResponse
 )
 from ...repositories.conversation_repository import db_manager
 from ...services.chat_service import chat_service

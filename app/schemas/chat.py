@@ -7,7 +7,7 @@ a integridade e validação dos dados.
 """
 
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 from datetime import datetime
 from uuid import UUID
 

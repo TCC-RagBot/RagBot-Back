@@ -8,10 +8,7 @@ orquestração dos fluxos de chat e ingestão de documentos.
 
 import time
 import uuid
-from typing import List, Dict, Any, Optional, Tuple
-from sentence_transformers import SentenceTransformer
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_google_genai import ChatGoogleGenerativeAI
+from typing import List, Dict, Any, Optional
 import google.generativeai as genai
 from loguru import logger
 
