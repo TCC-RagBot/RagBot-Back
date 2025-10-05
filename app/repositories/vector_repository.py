@@ -5,16 +5,15 @@ Este módulo implementa a integração com langchain-postgres para realizar
 busca por similaridade usando pgvector de forma otimizada.
 """
 
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from langchain_postgres import PGVector
 from langchain_postgres.vectorstores import DistanceStrategy
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
-import numpy as np
 from loguru import logger
 
 from ..config.settings import settings
-from ..config.constants import EMBEDDING_MODEL_NAME, MAX_CHUNKS_RETRIEVED
+from ..config.constants import EMBEDDING_MODEL_NAME
 
 
 class SentenceTransformerEmbeddings(Embeddings):
