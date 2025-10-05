@@ -57,12 +57,13 @@ backend/
 ├── app/                # Módulo principal da aplicação
 │   ├── __init__.py     # Inicialização do módulo
 │   ├── main.py         # Entry point da aplicação FastAPI
-│   ├── config/         # Configurações
-│   │   └── settings.py # Configurações e variáveis de ambiente
-│   ├── api/            # Camada de apresentação
-│   │   └── routes/
-│   │       └── chat.py # Endpoints da API
-│   ├── schemas/        # Modelos Pydantic
+│   ├── config/         # Configurações da aplicação
+│   │   ├── settings.py # Variáveis de ambiente e configurações
+│   │   └── constants.py # Constantes e parâmetros da aplicação
+│   ├── routes/         # Endpoints da API
+│   │   ├── __init__.py
+│   │   └── chat.py     # Rotas do chat e upload de documentos
+│   ├── schemas/        # Modelos Pydantic para validação
 │   │   └── chat.py     # Schemas para requests/responses
 │   ├── services/       # Lógica de negócio
 │   │   └── chat_service.py # Serviço principal do RAG

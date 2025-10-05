@@ -17,7 +17,7 @@ from .config.settings import settings
 from .config.constants import APP_NAME, APP_VERSION, DEFAULT_HOST, DEFAULT_PORT
 from .schemas.chat import ErrorResponse
 from .repositories.conversation_repository import db_manager
-from .api.routes.chat import router as chat_router
+from .routes.chat import router as chat_router
 
 
 @asynccontextmanager

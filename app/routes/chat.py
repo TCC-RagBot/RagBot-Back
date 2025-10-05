@@ -10,14 +10,14 @@ from fastapi import APIRouter, HTTPException, status, File, UploadFile
 from datetime import datetime
 from loguru import logger
 
-from ...config.settings import settings
-from ...config.constants import APP_NAME, APP_VERSION
-from ...schemas.chat import (
+from ..config.settings import settings
+from ..config.constants import APP_NAME, APP_VERSION
+from ..schemas.chat import (
     ChatRequest, ChatResponse, DocumentUploadResponse, 
     HealthResponse
 )
-from ...repositories.conversation_repository import db_manager
-from ...services.chat_service import chat_service
+from ..repositories.conversation_repository import db_manager
+from ..services.chat_service import chat_service
 
 # Router principal
 router = APIRouter()
