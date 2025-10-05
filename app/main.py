@@ -14,6 +14,7 @@ from fastapi.responses import JSONResponse
 from loguru import logger
 
 from .config.settings import settings
+from .config.constants import APP_NAME, APP_VERSION, DEFAULT_HOST, DEFAULT_PORT
 from .schemas.chat import ErrorResponse
 from .repositories.conversation_repository import db_manager
 from .api.routes.chat import router as chat_router
@@ -23,7 +24,7 @@ from .api.routes.chat import router as chat_router
 async def lifespan(app: FastAPI):
     """Gerencia o ciclo de vida da aplicação."""
     # Startup
-    logger.info(f"Starting {settings.app_name} v{settings.app_version}")
+    logger.info(f"Starting {APP_NAME} v{APP_VERSION}")
     
     # Verificar conexão com banco de dados
     if not db_manager.test_connection():
@@ -40,8 +41,8 @@ async def lifespan(app: FastAPI):
 
 # Configuração da aplicação FastAPI
 app = FastAPI(
-    title=settings.app_name,
-    version=settings.app_version,
+    title=APP_NAME,
+    version=APP_VERSION,
     description="Backend API para sistema RAG (Retrieval-Augmented Generation)",
     docs_url="/docs" if settings.debug else None,
     redoc_url="/redoc" if settings.debug else None,
@@ -112,8 +113,8 @@ if __name__ == "__main__":
     
     uvicorn.run(
         "app.main:app",
-        host=settings.host,
-        port=settings.port,
+        host=DEFAULT_HOST,
+        port=DEFAULT_PORT,
         reload=settings.debug,
         log_level=settings.log_level.lower()
     )

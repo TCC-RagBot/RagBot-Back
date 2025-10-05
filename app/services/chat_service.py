@@ -16,6 +16,7 @@ import google.generativeai as genai
 from loguru import logger
 
 from ..config.settings import settings
+from ..config.constants import MAX_CHUNKS_RETRIEVED
 from ..repositories.conversation_repository import db_manager
 from ..repositories.vector_repository import get_vector_store
 from ..schemas.chat import ChatResponse, SourceChunk
@@ -95,7 +96,7 @@ RESPOSTA:"""
                 conversation_id = db_manager.create_conversation()
             
             # Buscar chunks relevantes usando LangChain PostgreSQL
-            chunk_limit = max_chunks or settings.max_chunks_retrieved
+            chunk_limit = max_chunks or MAX_CHUNKS_RETRIEVED
             relevant_chunks = self.vector_store.similarity_search_with_score(user_message, k=chunk_limit)
             
             if not relevant_chunks:

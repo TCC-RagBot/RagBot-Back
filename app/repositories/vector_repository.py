@@ -14,6 +14,7 @@ import numpy as np
 from loguru import logger
 
 from ..config.settings import settings
+from ..config.constants import EMBEDDING_MODEL_NAME, MAX_CHUNKS_RETRIEVED
 
 
 class SentenceTransformerEmbeddings(Embeddings):
@@ -21,7 +22,7 @@ class SentenceTransformerEmbeddings(Embeddings):
     Wrapper para sentence-transformers compatível com LangChain.
     """
     
-    def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
+    def __init__(self, model_name: str = EMBEDDING_MODEL_NAME):
         from sentence_transformers import SentenceTransformer
         self.model = SentenceTransformer(model_name)
         self.model_name = model_name
@@ -53,7 +54,7 @@ class LangChainVectorStore:
     
     def __init__(self):
         """Inicializa o vector store."""
-        self.embeddings = SentenceTransformerEmbeddings(settings.embedding_model_name)
+        self.embeddings = SentenceTransformerEmbeddings(EMBEDDING_MODEL_NAME)
         
         # Configurar connection string para langchain-postgres
         # Garantir que usa o formato postgresql://

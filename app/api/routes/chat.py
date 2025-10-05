@@ -13,6 +13,7 @@ from datetime import datetime
 from loguru import logger
 
 from ...config.settings import settings
+from ...config.constants import APP_NAME, APP_VERSION
 from ...schemas.chat import (
     ChatRequest, ChatResponse, DocumentUploadResponse, 
     HealthResponse, ErrorResponse
@@ -33,8 +34,8 @@ async def root():
         dict: Informações básicas da API
     """
     return {
-        "message": f"Bem-vindo ao {settings.app_name}!",
-        "version": settings.app_version,
+        "message": f"Bem-vindo ao {APP_NAME}!",
+        "version": APP_VERSION,
         "docs": "/docs" if settings.debug else "Documentação disponível apenas em modo debug"
     }
 
@@ -54,7 +55,7 @@ async def health_check():
         return HealthResponse(
             status="healthy" if db_status == "healthy" else "degraded",
             timestamp=datetime.now().isoformat(),
-            version=settings.app_version,
+            version=APP_VERSION,
             database_status=db_status
         )
     except Exception as e:
@@ -62,7 +63,7 @@ async def health_check():
         return HealthResponse(
             status="unhealthy",
             timestamp=datetime.now().isoformat(),
-            version=settings.app_version,
+            version=APP_VERSION,
             database_status="error"
         )
 
