@@ -1,11 +1,3 @@
-"""
-Aplicação principal FastAPI para o sistema RAGBot.
-
-Este módulo define a aplicação FastAPI com todos os endpoints,
-middleware e configurações necessárias para o funcionamento
-do sistema de chat RAG.
-"""
-
 import time
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
@@ -22,11 +14,8 @@ from .routes.chat import router as chat_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Gerencia o ciclo de vida da aplicação."""
-    # Startup
     logger.info(f"Starting {APP_NAME} v{APP_VERSION}")
     
-    # Verificar conexão com banco de dados
     if not db_manager.test_connection():
         logger.error("Failed to connect to database!")
         raise RuntimeError("Database connection failed")
@@ -35,11 +24,10 @@ async def lifespan(app: FastAPI):
     
     yield
     
-    # Shutdown
     logger.info("Shutting down RAGBot application...")
 
 
-# Configuração da aplicação FastAPI
+# Configuação da aplicação FastAPI
 app = FastAPI(
     title=APP_NAME,
     version=APP_VERSION,
@@ -49,7 +37,6 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Configuração CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"] if settings.debug else ["http://localhost:3000"],
@@ -58,11 +45,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Incluir rotas
 app.include_router(chat_router)
 
-
-# Middleware para logging de requests
 @app.middleware("http")
 async def log_requests(request, call_next):
     """Middleware para logging de todas as requisições."""
@@ -78,8 +62,6 @@ async def log_requests(request, call_next):
     
     return response
 
-
-# Exception handlers
 @app.exception_handler(404)
 async def not_found_handler(request, exc):
     """Handler para erros 404."""
@@ -90,7 +72,6 @@ async def not_found_handler(request, exc):
             detail=f"O endpoint {request.url.path} não existe"
         ).model_dump()
     )
-
 
 @app.exception_handler(500)
 async def internal_error_handler(request, exc):
@@ -104,10 +85,6 @@ async def internal_error_handler(request, exc):
         ).model_dump()
     )
 
-
-
-
-
 if __name__ == "__main__":
     import uvicorn
     
@@ -116,5 +93,7 @@ if __name__ == "__main__":
         host=DEFAULT_HOST,
         port=DEFAULT_PORT,
         reload=settings.debug,
-        log_level=settings.log_level.lower()
+        log_level=settings.log_level.lower(),
+        timeout_keep_alive=60,  
+        timeout_graceful_shutdown=30
     )

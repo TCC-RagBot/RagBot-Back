@@ -1,8 +1,5 @@
 """
 Integração com LangChain PostgreSQL para busca vetorial.
-
-Este módulo implementa a integração com langchain-postgres para realizar
-busca por similaridade usando pgvector de forma otimizada.
 """
 
 from typing import List, Dict, Any
@@ -14,7 +11,6 @@ from loguru import logger
 
 from ..config.settings import settings
 from ..config.constants import EMBEDDING_MODEL_NAME
-
 
 class SentenceTransformerEmbeddings(Embeddings):
     """
@@ -28,7 +24,6 @@ class SentenceTransformerEmbeddings(Embeddings):
         logger.info(f"SentenceTransformer embeddings initialized: {model_name}")
     
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
-        """Gera embeddings para uma lista de documentos."""
         try:
             embeddings = self.model.encode(texts, convert_to_tensor=False)
             return [emb.tolist() for emb in embeddings]
@@ -37,7 +32,6 @@ class SentenceTransformerEmbeddings(Embeddings):
             raise
     
     def embed_query(self, text: str) -> List[float]:
-        """Gera embedding para uma query."""
         try:
             embedding = self.model.encode(text, convert_to_tensor=False)
             return embedding.tolist()
@@ -47,23 +41,16 @@ class SentenceTransformerEmbeddings(Embeddings):
 
 
 class LangChainVectorStore:
-    """
-    Gerenciador de vector store usando LangChain PostgreSQL.
-    """
     
     def __init__(self):
-        """Inicializa o vector store."""
         self.embeddings = SentenceTransformerEmbeddings(EMBEDDING_MODEL_NAME)
         
-        # Configurar connection string para langchain-postgres
-        # Garantir que usa o formato postgresql://
         db_url = settings.database_url
         if db_url.startswith('postgres://'):
             db_url = db_url.replace('postgres://', 'postgresql://')
         
         self.connection_string = db_url
         
-        # Inicializar PGVector
         self.vector_store = PGVector(
             embeddings=self.embeddings,
             connection=self.connection_string,
@@ -72,21 +59,19 @@ class LangChainVectorStore:
             use_jsonb=True
         )
         
+        self._ensure_vector_tables_exist()
+        
         logger.info("LangChain vector store initialized")
     
-    def similarity_search_with_score(self, query: str, k: int = 5) -> List[Dict[str, Any]]:
-        """
-        Realiza busca por similaridade com scores.
-        
-        Args:
-            query: Texto da consulta
-            k: Número de resultados
-            
-        Returns:
-            List[Dict]: Resultados com scores
-        """
+    def _ensure_vector_tables_exist(self):
         try:
-            # Usar o método nativo do PGVector
+            self.vector_store.similarity_search("test", k=1)
+        except Exception as e:
+            logger.debug(f"Vector tables will be created on first use: {e}")
+    
+    def similarity_search_with_score(self, query: str, k: int = 5) -> List[Dict[str, Any]]:
+       
+        try:
             results = self.vector_store.similarity_search_with_score(query, k=k)
             
             formatted_results = []
@@ -95,7 +80,7 @@ class LangChainVectorStore:
                     'chunk_id': doc.metadata.get('chunk_id'),
                     'content': doc.page_content,
                     'document_name': doc.metadata.get('file_name', 'Documento desconhecido'),
-                    'similarity_score': 1 - score,  # Converter distance para similarity
+                    'similarity_score': 1 - score, 
                     'metadata': doc.metadata
                 })
             
@@ -107,12 +92,6 @@ class LangChainVectorStore:
             return []
     
     def add_documents_from_db(self, chunks_data: List[Dict[str, Any]]):
-        """
-        Adiciona documentos existentes do banco para o vector store.
-        
-        Args:
-            chunks_data: Lista de dados dos chunks do banco
-        """
         try:
             documents = []
             for chunk in chunks_data:
@@ -135,13 +114,9 @@ class LangChainVectorStore:
             raise
 
 
-# Instância global do vector store
 langchain_vector_store = None
 
 def get_vector_store() -> LangChainVectorStore:
-    """
-    Retorna instância singleton do vector store.
-    """
     global langchain_vector_store
     if langchain_vector_store is None:
         langchain_vector_store = LangChainVectorStore()

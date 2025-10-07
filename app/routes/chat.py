@@ -1,10 +1,3 @@
-"""
-Rotas da API RAGBot.
-
-Este módulo contém todos os endpoints da aplicação,
-organizados por funcionalidade.
-"""
-
 import uuid
 from fastapi import APIRouter, HTTPException, status, File, UploadFile
 from datetime import datetime
@@ -18,36 +11,22 @@ from ..schemas.chat import (
 )
 from ..repositories.conversation_repository import db_manager
 from ..services.chat_service import chat_service
+from ..services.document_service import document_service
 
-# Router principal
 router = APIRouter()
 
 
 @router.get("/", response_model=dict)
 async def root():
-    """
-    Endpoint raiz da API.
-    
-    Returns:
-        dict: Informações básicas da API
-    """
     return {
         "message": f"Bem-vindo ao {APP_NAME}!",
         "version": APP_VERSION,
         "docs": "/docs" if settings.debug else "Documentação disponível apenas em modo debug"
     }
 
-
 @router.get("/health", response_model=HealthResponse)
 async def health_check():
-    """
-    Endpoint para verificação de saúde da aplicação.
-    
-    Returns:
-        HealthResponse: Status da aplicação e componentes
-    """
     try:
-        # Verificar conexão com banco de dados
         db_status = "healthy" if db_manager.test_connection() else "unhealthy"
         
         return HealthResponse(
@@ -68,21 +47,6 @@ async def health_check():
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat_endpoint(request: ChatRequest):
-    """
-    Endpoint principal para chat interativo.
-    
-    Recebe uma pergunta do usuário e retorna uma resposta baseada
-    nos documentos processados utilizando o sistema RAG.
-    
-    Args:
-        request: Dados da requisição de chat
-        
-    Returns:
-        ChatResponse: Resposta estruturada do chat
-        
-    Raises:
-        HTTPException: Em caso de erro no processamento
-    """
     try:
         logger.info(f"Processing chat request: {request.message[:100]}...")
         
@@ -105,51 +69,57 @@ async def chat_endpoint(request: ChatRequest):
 
 @router.post("/upload", response_model=DocumentUploadResponse)
 async def upload_document(file: UploadFile = File(...)):
-    """
-    Endpoint para upload e processamento de documentos.
-    
-    NOTA: Este endpoint está implementado para completude da API,
-    mas o processamento de documentos é normalmente feito offline
-    através do script de ingestão.
-    
-    Args:
-        file: Arquivo PDF a ser processado
-        
-    Returns:
-        DocumentUploadResponse: Resultado do processamento
-        
-    Raises:
-        HTTPException: Em caso de erro no processamento
-    """
     try:
+        logger.info(f"Starting document upload: {file.filename}")
+        
+        if not file.filename:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Nome do arquivo é obrigatório"
+            )
+        
         if not file.filename.lower().endswith('.pdf'):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Apenas arquivos PDF são suportados"
             )
         
-        # Ler conteúdo do arquivo
         content = await file.read()
         
-        # TODO: Implementar processamento de PDF
-        # Por enquanto, retorna uma resposta mock
-        logger.warning("PDF processing not implemented yet - returning mock response")
+        if len(content) == 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Arquivo está vazio"
+            )
         
-        return DocumentUploadResponse(
-            document_id=uuid.uuid4(),
-            filename=file.filename,
-            chunks_created=0,
-            processing_time=0.0,
-            status="pending - use ingest script for processing"
+        result = await document_service.process_document_upload(content, file.filename)
+        
+        if result.status.startswith("error"):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=result.status
+            )
+        
+        logger.success(
+            f"Document upload completed: {file.filename} "
+            f"({result.chunks_created} chunks, {result.processing_time:.2f}s)"
         )
+        
+        return result
         
     except HTTPException:
         raise
+    except ValueError as e:
+        logger.warning(f"Validation error for {file.filename}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
     except Exception as e:
-        logger.error(f"Error in upload endpoint: {e}")
+        logger.error(f"Unexpected error in upload endpoint: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao processar documento: {str(e)}"
+            detail=f"Erro interno ao processar documento: {str(e)}"
         )
 
 
@@ -168,7 +138,6 @@ async def get_conversation_messages(conversation_id: uuid.UUID):
         Este endpoint seria implementado conforme necessidade
         da interface frontend
     """
-    # TODO: Implementar recuperação de mensagens
     return {
         "conversation_id": conversation_id,
         "messages": [],

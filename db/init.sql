@@ -20,3 +20,12 @@ CREATE TABLE message_source_chunks (
     similarity_score FLOAT,
     PRIMARY KEY (message_id, chunk_content)
 );
+
+CREATE TABLE documents (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    filename TEXT NOT NULL UNIQUE,
+    chunks_count INTEGER NOT NULL,
+    file_size_bytes BIGINT NOT NULL,
+    processed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
