@@ -12,7 +12,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, Session
 from loguru import logger
 
-from .config import settings
+from ..config.settings import settings
 
 
 class MinimalDatabaseManager:

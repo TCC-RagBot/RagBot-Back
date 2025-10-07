@@ -8,16 +8,15 @@ orquestração dos fluxos de chat e ingestão de documentos.
 
 import time
 import uuid
-from typing import List, Dict, Any, Optional, Tuple
-from sentence_transformers import SentenceTransformer
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_google_genai import ChatGoogleGenerativeAI
+from typing import List, Dict, Any, Optional
 import google.generativeai as genai
 from loguru import logger
 
-from .config import settings
-from .crud import db_manager
-from .schemas import ChatResponse, SourceChunk
+from ..config.settings import settings
+from ..config.constants import MAX_CHUNKS_RETRIEVED
+from ..repositories.conversation_repository import db_manager
+from ..repositories.vector_repository import get_vector_store
+from ..schemas.chat import ChatResponse, SourceChunk
 
 
 class ChatService:
@@ -35,7 +34,6 @@ class ChatService:
         self.model = genai.GenerativeModel('gemini-2.5-flash')
         
         # Inicializar LangChain vector store
-        from .langchain_vector import get_vector_store
         self.vector_store = get_vector_store()
         
         logger.info("Chat service initialized with Gemini and LangChain")
@@ -95,7 +93,7 @@ RESPOSTA:"""
                 conversation_id = db_manager.create_conversation()
             
             # Buscar chunks relevantes usando LangChain PostgreSQL
-            chunk_limit = max_chunks or settings.max_chunks_retrieved
+            chunk_limit = max_chunks or MAX_CHUNKS_RETRIEVED
             relevant_chunks = self.vector_store.similarity_search_with_score(user_message, k=chunk_limit)
             
             if not relevant_chunks:

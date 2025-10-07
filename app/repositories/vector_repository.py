@@ -5,15 +5,15 @@ Este módulo implementa a integração com langchain-postgres para realizar
 busca por similaridade usando pgvector de forma otimizada.
 """
 
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from langchain_postgres import PGVector
 from langchain_postgres.vectorstores import DistanceStrategy
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
-import numpy as np
 from loguru import logger
 
-from .config import settings
+from ..config.settings import settings
+from ..config.constants import EMBEDDING_MODEL_NAME
 
 
 class SentenceTransformerEmbeddings(Embeddings):
@@ -21,7 +21,7 @@ class SentenceTransformerEmbeddings(Embeddings):
     Wrapper para sentence-transformers compatível com LangChain.
     """
     
-    def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
+    def __init__(self, model_name: str = EMBEDDING_MODEL_NAME):
         from sentence_transformers import SentenceTransformer
         self.model = SentenceTransformer(model_name)
         self.model_name = model_name
@@ -53,7 +53,7 @@ class LangChainVectorStore:
     
     def __init__(self):
         """Inicializa o vector store."""
-        self.embeddings = SentenceTransformerEmbeddings(settings.embedding_model_name)
+        self.embeddings = SentenceTransformerEmbeddings(EMBEDDING_MODEL_NAME)
         
         # Configurar connection string para langchain-postgres
         # Garantir que usa o formato postgresql://
