@@ -9,8 +9,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from ..config.constants import MAX_FILE_SIZE_MB, CHUNK_SIZE, CHUNK_OVERLAP
 from ..repositories.vector_repository import get_vector_store
 from ..repositories.document_repository import document_repository
-from ..schemas.chat import DocumentUploadResponse
-
+from ..schemas.document_schemas import DocumentUploadResponse
 
 class DocumentService:
     

@@ -7,9 +7,11 @@ from loguru import logger
 
 from .config.settings import settings
 from .config.constants import APP_NAME, APP_VERSION, DEFAULT_HOST, DEFAULT_PORT
-from .schemas.chat import ErrorResponse
-from .repositories.conversation_repository import db_manager
-from .routes.chat import router as chat_router
+from .schemas.shared_schemas import ErrorResponse
+from .repositories.chat_repository import db_manager
+from .routes.core_routes import router as core_router
+from .routes.chat_routes import router as chat_router
+from .routes.document_routes import router as document_router
 
 
 @asynccontextmanager
@@ -27,7 +29,6 @@ async def lifespan(app: FastAPI):
     logger.info("Shutting down RAGBot application...")
 
 
-# Configuação da aplicação FastAPI
 app = FastAPI(
     title=APP_NAME,
     version=APP_VERSION,
@@ -45,11 +46,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(core_router)
 app.include_router(chat_router)
+app.include_router(document_router)
 
 @app.middleware("http")
 async def log_requests(request, call_next):
-    """Middleware para logging de todas as requisições."""
     start_time = time.time()
     response = await call_next(request)
     process_time = time.time() - start_time
@@ -64,7 +66,6 @@ async def log_requests(request, call_next):
 
 @app.exception_handler(404)
 async def not_found_handler(request, exc):
-    """Handler para erros 404."""
     return JSONResponse(
         status_code=404,
         content=ErrorResponse(
@@ -75,7 +76,6 @@ async def not_found_handler(request, exc):
 
 @app.exception_handler(500)
 async def internal_error_handler(request, exc):
-    """Handler para erros internos do servidor."""
     logger.error(f"Internal server error: {exc}")
     return JSONResponse(
         status_code=500,

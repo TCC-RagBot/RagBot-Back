@@ -1,10 +1,3 @@
-"""
-Operações mínimas de banco de dados para conversas e mensagens.
-
-Este módulo contém apenas as operações essenciais que não são cobertas
-pelo LangChain, focando em conversas e mensagens do sistema de chat.
-"""
-
 import uuid
 from typing import List, Optional
 from datetime import datetime
@@ -16,24 +9,15 @@ from ..config.settings import settings
 
 
 class MinimalDatabaseManager:
-    """
-    Gerenciador minimalista para operações de conversa e mensagens.
-    
-    Operações de documentos e chunks são gerenciadas pelo LangChain.
-    """
-    
     def __init__(self):
-        """Inicializa o gerenciador do banco de dados."""
         self.engine = create_engine(settings.database_url)
         self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
         logger.info("Minimal database manager initialized")
     
     def get_session(self) -> Session:
-        """Cria uma nova sessão do banco de dados."""
         return self.SessionLocal()
     
     def test_connection(self) -> bool:
-        """Testa a conexão com o banco de dados."""
         try:
             with self.engine.connect() as conn:
                 conn.execute(text("SELECT 1"))
@@ -43,7 +27,6 @@ class MinimalDatabaseManager:
             return False
     
     def create_conversation(self, user_id: Optional[str] = None) -> uuid.UUID:
-        """Cria uma nova conversa."""
         with self.get_session() as session:
             try:
                 conversation_id = uuid.uuid4()
@@ -68,7 +51,6 @@ class MinimalDatabaseManager:
     
     def create_message(self, conversation_id: uuid.UUID, user_message: str, 
                       assistant_response: str, source_chunks: List = None) -> uuid.UUID:
-        """Cria mensagens na conversa (user + assistant)."""
         with self.get_session() as session:
             try:
                 # Criar mensagem do usuário
@@ -110,6 +92,4 @@ class MinimalDatabaseManager:
                 logger.error(f"Error creating message: {e}")
                 raise
 
-
-# Instância global do gerenciador minimalista
 db_manager = MinimalDatabaseManager()

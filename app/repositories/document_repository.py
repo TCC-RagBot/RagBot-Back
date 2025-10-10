@@ -3,7 +3,7 @@ from typing import Optional
 from datetime import datetime
 from sqlalchemy import text
 from loguru import logger
-from ..repositories.conversation_repository import db_manager
+from ..repositories.chat_repository import db_manager
 
 class DocumentRepository:
     def __init__(self):
