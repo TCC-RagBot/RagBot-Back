@@ -6,7 +6,7 @@ from loguru import logger
 
 from ..config.settings import settings
 from ..config.constants import MAX_CHUNKS_RETRIEVED
-from ..repositories.chat_repository import db_manager
+from ..repositories.chat_repository import ChatRepository
 from ..repositories.vector_repository import get_vector_store
 from ..schemas.chat_schemas import ChatResponse
 from ..schemas.shared_schemas import SourceChunk
@@ -19,6 +19,7 @@ class ChatService:
         self.model = genai.GenerativeModel('gemini-2.5-flash')
         
         self.vector_store = get_vector_store()
+        self.chat_repository = ChatRepository()
         
         logger.info("Chat service initialized with Gemini and LangChain")
     
@@ -53,7 +54,7 @@ RESPOSTA:"""
         
         try:
             if not conversation_id:
-                conversation_id = db_manager.create_conversation()
+                conversation_id = self.chat_repository.create_conversation()
             
             chunk_limit = max_chunks or MAX_CHUNKS_RETRIEVED
             relevant_chunks = self.vector_store.similarity_search_with_score(user_message, k=chunk_limit)
@@ -83,7 +84,7 @@ RESPOSTA:"""
             
             # Salvar mensagem no banco (sem source_chunks por enquanto)
             # LangChain não usa UUIDs tradicionais para chunks
-            message_id = db_manager.create_message(
+            message_id = self.chat_repository.create_message(
                 conversation_id=conversation_id,
                 user_message=user_message,
                 assistant_response=response_text,

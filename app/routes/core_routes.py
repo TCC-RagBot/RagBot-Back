@@ -5,7 +5,7 @@ from loguru import logger
 from ..config.settings import settings
 from ..config.constants import APP_NAME, APP_VERSION
 from ..schemas.shared_schemas import HealthResponse
-from ..repositories.chat_repository import db_manager
+from db.manager import db_manager
 
 router = APIRouter()
 

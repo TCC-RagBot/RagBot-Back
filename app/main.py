@@ -8,7 +8,7 @@ from loguru import logger
 from .config.settings import settings
 from .config.constants import APP_NAME, APP_VERSION, DEFAULT_HOST, DEFAULT_PORT
 from .schemas.shared_schemas import ErrorResponse
-from .repositories.chat_repository import db_manager
+from db.manager import db_manager
 from .routes.core_routes import router as core_router
 from .routes.chat_routes import router as chat_router
 from .routes.document_routes import router as document_router
