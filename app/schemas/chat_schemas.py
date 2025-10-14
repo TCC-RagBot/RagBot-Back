@@ -6,9 +6,9 @@ from .shared_schemas import SourceChunk
 
 
 class ChatRequest(BaseModel):
-    message: str = Field(..., min_length=1, max_length=1000, description="Mensagem do usuário")
+    message: str = Field(..., min_length=1, max_length=1000, description="Mensagem do usuário", example="O que é pênalti?")
     conversation_id: Optional[UUID] = Field(None, description="ID da conversa")
-    max_chunks: Optional[int] = Field(5, ge=1, le=10, description="Máximo de chunks a recuperar")
+    max_chunks: int = Field(..., ge=1, le=10, description="Máximo de chunks a recuperar", example=5)
 
 
 class ChatResponse(BaseModel):

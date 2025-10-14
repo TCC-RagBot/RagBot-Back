@@ -15,8 +15,8 @@ async def chat_endpoint(request: ChatRequest):
         
         response = await chat_service.process_chat(
             user_message=request.message,
-            conversation_id=request.conversation_id,
-            max_chunks=request.max_chunks
+            max_chunks=request.max_chunks,
+            conversation_id=request.conversation_id
         )
         
         logger.info(f"Chat response generated successfully in {response.processing_time:.4f}s")

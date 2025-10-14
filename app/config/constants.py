@@ -1,9 +1,6 @@
 # Configurações do modelo de embedding
 EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
 
-# Configurações de busca e retrieval
-MAX_CHUNKS_RETRIEVED = 5
-
 # Configurações da aplicação
 APP_NAME = "RAGBot"
 APP_VERSION = "1.0.0"

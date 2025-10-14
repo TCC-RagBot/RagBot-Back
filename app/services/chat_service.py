@@ -5,7 +5,6 @@ import google.generativeai as genai
 from loguru import logger
 
 from ..config.settings import settings
-from ..config.constants import MAX_CHUNKS_RETRIEVED
 from ..repositories.chat_repository import ChatRepository
 from ..repositories.vector_repository import get_vector_store
 from ..schemas.chat_schemas import ChatResponse
@@ -48,16 +47,15 @@ RESPOSTA:"""
         
         return prompt
     
-    async def process_chat(self, user_message: str, conversation_id: Optional[uuid.UUID] = None,
-                          max_chunks: int = None) -> ChatResponse:
+    async def process_chat(self, user_message: str, max_chunks: int, 
+                          conversation_id: Optional[uuid.UUID] = None) -> ChatResponse:
         start_time = time.time()
         
         try:
             if not conversation_id:
                 conversation_id = self.chat_repository.create_conversation()
             
-            chunk_limit = max_chunks or MAX_CHUNKS_RETRIEVED
-            relevant_chunks = self.vector_store.similarity_search_with_score(user_message, k=chunk_limit)
+            relevant_chunks = self.vector_store.similarity_search_with_score(user_message, k=max_chunks)
             
             if not relevant_chunks:
                 logger.warning("No relevant chunks found for query")
