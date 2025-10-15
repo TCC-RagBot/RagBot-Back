@@ -1,11 +1,25 @@
 from fastapi import APIRouter, HTTPException, status, File, UploadFile
 from loguru import logger
 
-from ..schemas.document_schemas import DocumentUploadResponse
+from ..schemas.document_schemas import DocumentUploadResponse, DocumentListResponse
 from ..services.document_service import document_service
 
 router = APIRouter()
 
+@router.get("/list", response_model=DocumentListResponse)
+async def list_documents():
+    try:
+        logger.info("Listing all documents")
+        result = document_service.list_documents()
+        logger.info(f"Documents listed successfully: {result.total_documents} found")
+        return result
+        
+    except Exception as e:
+        logger.error(f"Error in list documents endpoint: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao listar documentos: {str(e)}"
+        )
 
 @router.post("/upload", response_model=DocumentUploadResponse)
 async def upload_document(file: UploadFile = File(...)):

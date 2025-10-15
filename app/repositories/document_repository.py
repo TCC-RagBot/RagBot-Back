@@ -92,4 +92,31 @@ class DocumentRepository:
                 logger.error(f"Error getting document info: {e}")
                 return None
 
+    def list_all_documents(self) -> list:
+        with self.db_manager.get_session() as session:
+            try:
+                query = text("""
+                    SELECT id, filename, file_size_bytes, created_at
+                    FROM documents 
+                    ORDER BY created_at DESC
+                """)
+                
+                result = session.execute(query)
+                documents = []
+                
+                for row in result.fetchall():
+                    documents.append({
+                        'id': row.id,
+                        'filename': row.filename,
+                        'file_size_bytes': row.file_size_bytes,
+                        'created_at': row.created_at
+                    })
+                
+                logger.info(f"Listed {len(documents)} documents")
+                return documents
+                
+            except Exception as e:
+                logger.error(f"Error listing documents: {e}")
+                return []
+
 document_repository = DocumentRepository()

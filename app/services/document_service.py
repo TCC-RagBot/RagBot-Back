@@ -9,7 +9,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from ..config.constants import MAX_FILE_SIZE_MB, CHUNK_SIZE, CHUNK_OVERLAP
 from ..repositories.vector_repository import get_vector_store
 from ..repositories.document_repository import document_repository
-from ..schemas.document_schemas import DocumentUploadResponse
+from ..schemas.document_schemas import DocumentUploadResponse, DocumentListResponse, DocumentInfo
 
 class DocumentService:
     
@@ -132,6 +132,38 @@ class DocumentService:
                 chunks_created=0,
                 processing_time=processing_time,
                 status=f"error: {str(e)}"
+            )
+    
+    def list_documents(self) -> DocumentListResponse:
+        try:
+            documents_data = document_repository.list_all_documents()
+            
+            document_list = []
+            for doc in documents_data:
+                # Converter bytes para KB
+                file_size_kb = round(doc['file_size_bytes'] / 1024, 2)
+                # Formatar data para padrão brasileiro
+                uploaded_at = doc['created_at'].strftime("%d/%m/%Y às %H:%M")
+                document_info = DocumentInfo(
+                    id=doc['id'],
+                    filename=doc['filename'],
+                    file_size_kb=file_size_kb,
+                    uploaded_at=uploaded_at
+                )
+                document_list.append(document_info)
+            
+            logger.info(f"Listed {len(document_list)} documents for API response")
+            
+            return DocumentListResponse(
+                documents=document_list,
+                total_documents=len(document_list)
+            )
+            
+        except Exception as e:
+            logger.error(f"Error in document listing service: {e}")
+            return DocumentListResponse(
+                documents=[],
+                total_documents=0
             )
 
 document_service = DocumentService()
