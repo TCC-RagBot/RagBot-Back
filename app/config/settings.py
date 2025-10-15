@@ -3,7 +3,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     database_url: str
     gemini_api_key: str
-    secret_key: str
     debug: bool = False
     log_level: str = "INFO"
     
