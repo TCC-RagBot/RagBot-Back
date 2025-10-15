@@ -1,7 +1,3 @@
-"""
-Integração com LangChain PostgreSQL para busca vetorial.
-"""
-
 from typing import List, Dict, Any
 from langchain_postgres import PGVector
 from langchain_postgres.vectorstores import DistanceStrategy

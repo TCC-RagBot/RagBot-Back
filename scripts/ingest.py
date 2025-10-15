@@ -4,10 +4,9 @@ from pathlib import Path
 import argparse
 from loguru import logger
 
-# Adicionar o diretório pai ao path para importar módulos da app
 sys.path.append(str(Path(__file__).parent.parent))
 
-from app.repositories.vector_repository import get_vector_store # Importa a função que busca nossa instância do PGVector
+from app.repositories.vector_repository import get_vector_store
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 

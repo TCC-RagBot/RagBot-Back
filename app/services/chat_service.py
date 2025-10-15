@@ -1,11 +1,3 @@
-"""
-Serviços de lógica de negócio para o sistema RAGBot.
-
-Este módulo contém a implementação da lógica principal do sistema RAG,
-incluindo processamento de embeddings, geração de respostas e
-orquestração dos fluxos de chat e ingestão de documentos.
-"""
-
 import time
 import uuid
 from typing import List, Dict, Any, Optional
@@ -13,42 +5,25 @@ import google.generativeai as genai
 from loguru import logger
 
 from ..config.settings import settings
-from ..config.constants import MAX_CHUNKS_RETRIEVED
-from ..repositories.conversation_repository import db_manager
+from ..repositories.chat_repository import ChatRepository
 from ..repositories.vector_repository import get_vector_store
-from ..schemas.chat import ChatResponse, SourceChunk
+from ..schemas.chat_schemas import ChatResponse
+from ..schemas.shared_schemas import SourceChunk
 
 
 class ChatService:
-    """
-    Serviço principal para o sistema de chat RAG.
-    
-    Orquestra o fluxo completo: recebe pergunta, busca chunks relevantes,
-    gera prompt e obtém resposta da OpenAI.
-    """
     
     def __init__(self):
-        """Inicializa o serviço de chat."""
-        # Configurar Gemini
         genai.configure(api_key=settings.gemini_api_key)
         self.model = genai.GenerativeModel('gemini-2.5-flash')
         
-        # Inicializar LangChain vector store
         self.vector_store = get_vector_store()
+        self.chat_repository = ChatRepository()
         
         logger.info("Chat service initialized with Gemini and LangChain")
     
     def _build_prompt(self, user_question: str, relevant_chunks: List[Dict[str, Any]]) -> str:
-        """
-        Constrói o prompt para a OpenAI com base na pergunta e chunks relevantes.
-        
-        Args:
-            user_question: Pergunta do usuário
-            relevant_chunks: Lista de chunks relevantes
-            
-        Returns:
-            str: Prompt formatado
-        """
+      
         context = "\n\n".join([
             f"Documento: {chunk['document_name']}\nConteúdo: {chunk['content']}"
             for chunk in relevant_chunks
@@ -72,29 +47,15 @@ RESPOSTA:"""
         
         return prompt
     
-    async def process_chat(self, user_message: str, conversation_id: Optional[uuid.UUID] = None,
-                          max_chunks: int = None) -> ChatResponse:
-        """
-        Processa uma mensagem de chat e retorna a resposta.
-        
-        Args:
-            user_message: Mensagem do usuário
-            conversation_id: ID da conversa (opcional)
-            max_chunks: Número máximo de chunks a recuperar
-            
-        Returns:
-            ChatResponse: Resposta estruturada do chat
-        """
+    async def process_chat(self, user_message: str, max_chunks: int, 
+                          conversation_id: Optional[uuid.UUID] = None) -> ChatResponse:
         start_time = time.time()
         
         try:
-            # Criar nova conversa se necessário
             if not conversation_id:
-                conversation_id = db_manager.create_conversation()
+                conversation_id = self.chat_repository.create_conversation()
             
-            # Buscar chunks relevantes usando LangChain PostgreSQL
-            chunk_limit = max_chunks or MAX_CHUNKS_RETRIEVED
-            relevant_chunks = self.vector_store.similarity_search_with_score(user_message, k=chunk_limit)
+            relevant_chunks = self.vector_store.similarity_search_with_score(user_message, k=max_chunks)
             
             if not relevant_chunks:
                 logger.warning("No relevant chunks found for query")
@@ -121,11 +82,11 @@ RESPOSTA:"""
             
             # Salvar mensagem no banco (sem source_chunks por enquanto)
             # LangChain não usa UUIDs tradicionais para chunks
-            message_id = db_manager.create_message(
+            message_id = self.chat_repository.create_message(
                 conversation_id=conversation_id,
                 user_message=user_message,
                 assistant_response=response_text,
-                source_chunks=[]  # Será implementado posteriormente se necessário
+                source_chunks=[]  
             )
             
             processing_time = time.time() - start_time
@@ -142,6 +103,4 @@ RESPOSTA:"""
             logger.error(f"Error processing chat: {e}")
             raise
 
-
-# Instâncias globais dos serviços
 chat_service = ChatService()
