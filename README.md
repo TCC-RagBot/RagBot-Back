@@ -190,7 +190,62 @@ python scripts/ingest.py
 .\venv\Scripts\python.exe scripts/ingest.py
 ```
 
-## � Licença
+## 🧪 Executar Testes
+
+O projeto inclui uma suíte completa de testes automatizados para validar o funcionamento do sistema de ingestão de PDFs e geração de embeddings.
+
+### **Executar Todos os Testes**
+
+```bash
+# Modo básico - apenas resultados
+python -m pytest tests/
+
+# Modo verboso - com detalhes dos testes
+python -m pytest tests/ -v
+
+# Com prints dos testes visíveis (RECOMENDADO)
+python -m pytest tests/ -v -s
+```
+
+### **Executar Teste Específico**
+
+```bash
+# Teste completo end-to-end (RECOMENDADO para validação geral)
+python -m pytest tests/test_ingestion.py::TestPDFIngestion::test_end_to_end_ingestion_flow -v -s
+
+# Teste de carregamento de PDF apenas
+python -m pytest tests/test_ingestion.py::TestPDFIngestion::test_pdf_loading_with_pypdf -v -s
+```
+
+### **Saída Esperada dos Testes** 
+
+Quando tudo está funcionando corretamente, você verá:
+
+```
+✅ PDF carregado com sucesso: 1 páginas, 3219 caracteres totais
+✅ Documento dividido em 4 chunks (tamanho médio: 912 chars)  
+✅ Embeddings gerados com sucesso: 3 vetores de 384D (valores: -0.141 a 0.152)
+✅ Persistência no banco mockada com sucesso
+
+🔄 Executando teste end-to-end do fluxo de ingestão...
+📄 Passo 1: Carregando PDF...
+✂️ Passo 2: Criando chunks...
+🧮 Passo 3: Gerando embeddings...
+✅ Teste end-to-end concluído com sucesso!
+📊 Resumo: 1 páginas → 4 chunks → pipeline completo!
+
+======================== 5 passed in 10.52s ========================
+```
+
+### **Pré-requisitos para Testes**
+
+- ✅ Ambiente virtual ativo
+- ✅ Dependências instaladas (`pip install -r requirements.txt`)  
+- ✅ Arquivo `pdf-test.pdf` na raiz do projeto (incluído no repositório)
+
+📚 **Documentação completa dos testes**: Veja [`tests/README.md`](./tests/README.md) para informações detalhadas.
+
+## 📄 Licença
 
 Projeto desenvolvido para o **TCC de Engenharia de Software**.
 

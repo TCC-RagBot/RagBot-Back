@@ -92,4 +92,75 @@ class DocumentRepository:
                 logger.error(f"Error getting document info: {e}")
                 return None
 
+    def list_all_documents(self) -> list:
+        with self.db_manager.get_session() as session:
+            try:
+                query = text("""
+                    SELECT id, filename, file_size_bytes, created_at
+                    FROM documents 
+                    ORDER BY created_at DESC
+                """)
+                
+                result = session.execute(query)
+                documents = []
+                
+                for row in result.fetchall():
+                    documents.append({
+                        'id': row.id,
+                        'filename': row.filename,
+                        'file_size_bytes': row.file_size_bytes,
+                        'created_at': row.created_at
+                    })
+                
+                logger.info(f"Listed {len(documents)} documents")
+                return documents
+                
+            except Exception as e:
+                logger.error(f"Error listing documents: {e}")
+                return []
+
+    def delete_document(self, document_id: uuid.UUID) -> Optional[dict]:
+        with self.db_manager.get_session() as session:
+            try:
+                query_select = text("""
+                    SELECT id, filename, file_size_bytes, created_at
+                    FROM documents 
+                    WHERE id = :document_id
+                """)
+                
+                result = session.execute(query_select, {'document_id': document_id})
+                document_info = result.fetchone()
+                
+                if not document_info:
+                    logger.warning(f"Document not found for deletion: {document_id}")
+                    return None
+                
+                query_delete = text("""
+                    DELETE FROM documents 
+                    WHERE id = :document_id
+                """)
+                
+                result = session.execute(query_delete, {'document_id': document_id})
+                
+                if result.rowcount == 0:
+                    logger.warning(f"No document deleted for ID: {document_id}")
+                    return None
+                
+                session.commit()
+                
+                deleted_doc = {
+                    'id': document_info.id,
+                    'filename': document_info.filename,
+                    'file_size_bytes': document_info.file_size_bytes,
+                    'created_at': document_info.created_at
+                }
+                
+                logger.info(f"Document deleted successfully: {document_info.filename}")
+                return deleted_doc
+                
+            except Exception as e:
+                session.rollback()
+                logger.error(f"Error deleting document {document_id}: {e}")
+                raise
+
 document_repository = DocumentRepository()
