@@ -9,7 +9,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from ..config.constants import MAX_FILE_SIZE_MB, CHUNK_SIZE, CHUNK_OVERLAP
 from ..repositories.vector_repository import get_vector_store
 from ..repositories.document_repository import document_repository
-from ..schemas.document_schemas import DocumentUploadResponse, DocumentListResponse, DocumentInfo
+from ..schemas.document_schemas import DocumentUploadResponse, DocumentListResponse, DocumentInfo, DocumentDeleteResponse
 
 class DocumentService:
     
@@ -165,5 +165,30 @@ class DocumentService:
                 documents=[],
                 total_documents=0
             )
+    
+    def delete_document(self, document_id: uuid.UUID) -> DocumentDeleteResponse:
+        try:
+            # Excluir do banco de dados
+            deleted_doc = document_repository.delete_document(document_id)
+            
+            if not deleted_doc:
+                raise ValueError(f"Documento com ID {document_id} não encontrado")
+            
+            deleted_chunks = self.vector_store.delete_documents_by_filename(deleted_doc['filename'])
+            
+            logger.info(f"Document deleted completely: {deleted_doc['filename']} ({deleted_chunks} chunks removed)")
+            
+            return DocumentDeleteResponse(
+                document_id=deleted_doc['id'],
+                filename=deleted_doc['filename'],
+                message=f"Documento '{deleted_doc['filename']}' excluído com sucesso",
+                success=True
+            )
+            
+        except ValueError:
+            raise
+        except Exception as e:
+            logger.error(f"Error in document deletion service: {e}")
+            raise ValueError(f"Erro interno ao excluir documento: {str(e)}")
 
 document_service = DocumentService()

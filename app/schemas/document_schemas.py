@@ -18,3 +18,9 @@ class DocumentInfo(BaseModel):
 class DocumentListResponse(BaseModel):
     documents: List[DocumentInfo] = Field(..., description="Lista de documentos")
     total_documents: int = Field(..., ge=0, description="Total de documentos")
+
+class DocumentDeleteResponse(BaseModel):
+    document_id: UUID = Field(..., description="ID do documento excluído")
+    filename: str = Field(..., description="Nome do arquivo excluído")
+    message: str = Field(..., description="Mensagem de confirmação")
+    success: bool = Field(..., description="Status da exclusão")

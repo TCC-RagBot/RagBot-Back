@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException, status, File, UploadFile
 from loguru import logger
+import uuid
 
-from ..schemas.document_schemas import DocumentUploadResponse, DocumentListResponse
+from ..schemas.document_schemas import DocumentUploadResponse, DocumentListResponse, DocumentDeleteResponse
 from ..services.document_service import document_service
 
 router = APIRouter()
@@ -20,6 +21,28 @@ async def list_documents():
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Erro ao listar documentos: {str(e)}"
         )
+
+@router.delete("/{document_id}", response_model=DocumentDeleteResponse)
+async def delete_document(document_id: uuid.UUID):
+    try:
+        logger.info(f"Deleting document: {document_id}")
+        result = document_service.delete_document(document_id)
+        logger.info(f"Document deleted successfully: {result.filename}")
+        return result
+        
+    except ValueError as e:
+        logger.warning(f"Document not found for deletion: {document_id}")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
+    except Exception as e:
+        logger.error(f"Error in delete document endpoint: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao excluir documento: {str(e)}"
+        )
+
 
 @router.post("/upload", response_model=DocumentUploadResponse)
 async def upload_document(file: UploadFile = File(...)):
