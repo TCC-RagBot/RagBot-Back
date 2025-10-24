@@ -1,7 +1,3 @@
-"""
-Integração com LangChain PostgreSQL para busca vetorial.
-"""
-
 from typing import List, Dict, Any
 from langchain_postgres import PGVector
 from langchain_postgres.vectorstores import DistanceStrategy
@@ -111,6 +107,29 @@ class LangChainVectorStore:
             
         except Exception as e:
             logger.error(f"Error adding documents to vector store: {e}")
+            raise
+
+    def delete_documents_by_filename(self, filename: str) -> int:
+        try:
+            from sqlalchemy import text
+            
+            db_url = self.connection_string
+            from sqlalchemy import create_engine
+            engine = create_engine(db_url)
+            
+            with engine.connect() as conn:
+                result = conn.execute(
+                    text("DELETE FROM langchain_pg_embedding WHERE cmetadata ->> 'file_name' = :filename"),
+                    {"filename": filename}
+                )
+                deleted_count = result.rowcount
+                conn.commit()
+            
+            logger.info(f"Deleted {deleted_count} chunks for file: {filename}")
+            return deleted_count
+            
+        except Exception as e:
+            logger.error(f"Error deleting chunks for file {filename}: {e}")
             raise
 
 
