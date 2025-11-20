@@ -66,7 +66,7 @@ def create_app() -> FastAPI:
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"] if settings.debug else ["http://localhost:3000"],
+        allow_origins=["*"] if settings.debug else ["http://localhost:5173", "http://localhost:3000"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -78,7 +78,7 @@ def create_app() -> FastAPI:
     app.exception_handler(500)(internal_error_handler)
 
     app.include_router(core_router, tags=["Sistema"])
-    app.include_router(chat_router, tags=["Chat"])
-    app.include_router(document_router, tags=["Documentos"])
+    app.include_router(chat_router, prefix="/api", tags=["Chat"])
+    app.include_router(document_router, prefix="/api/documents", tags=["Documentos"])
 
     return app

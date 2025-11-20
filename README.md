@@ -82,7 +82,7 @@ backend/
 
 Antes de começar, certifique-se de ter instalado:
 
-- 🐍 **Python 3.11+** - [Download aqui](https://www.python.org/downloads/)
+- 🐍 **Python 3.11** (OBRIGATÓRIO - não use 3.12 ou 3.13) - [Download aqui](https://www.python.org/downloads/release/python-3118/)
 - 🐳 **Docker & Docker Compose** - [Instalar Docker](https://docs.docker.com/get-docker/)
 - 🔑 **Google Gemini API Key** - [Obter aqui](https://ai.google.dev/)
 
@@ -96,6 +96,10 @@ cd RagBot-Back
 ### **2️⃣ Configurar Ambiente Virtual**
 
 ```bash
+# IMPORTANTE: Use Python 3.11 (não 3.12 ou 3.13)
+# Verificar versão primeiro:
+python --version  # Deve mostrar Python 3.11.x
+
 # Criar ambiente virtual com Python 3.11
 python -m venv venv
 
@@ -116,6 +120,9 @@ python --version  # Deve mostrar Python 3.11+
 ```bash
 # Atualizar pip para a versão mais recente
 python -m pip install --upgrade pip
+
+# IMPORTANTE: Se você estiver usando Python 3.12+ e receber erro de compilação do NumPy:
+# Desinstale o ambiente atual e recrie com Python 3.11
 
 # Instalar todas as dependências do projeto
 pip install -r requirements.txt
