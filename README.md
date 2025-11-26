@@ -191,10 +191,10 @@ curl http://localhost:8000/health
 
 ```bash
 # Colocar PDFs na pasta documents/ e executar:
-python scripts/ingest.py
+python scripts/ingest.py "documents/seu-documento.pdf"
 
 # OU usando o executável do venv diretamente:
-.\venv\Scripts\python.exe scripts/ingest.py
+.\venv\Scripts\python.exe scripts/ingest.py "documents/seu-documento.pdf"
 ```
 
 ## 🧪 Executar Testes
