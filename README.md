@@ -1,4 +1,4 @@
-# RAGBot Backend 🤖
+# RAGBot Backend
 
 ![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-green.svg)
@@ -7,16 +7,16 @@
 
 Backend API para sistema RAG (Retrieval-Augmented Generation) desenvolvido como TCC de Engenharia de Software.
 
-## 📋 Sobre o Projeto
+## Sobre o Projeto
 
-O **RAGBot** é um sistema completo de chat inteligente que processa documentos PDF e responde perguntas baseado **exclusivamente** no conteúdo dos documentos carregados. Utiliza técnicas avançadas de IA para:
+RAGBot é um sistema de chat que processa documentos PDF e responde perguntas com base no conteúdo dos documentos carregados. O sistema implementa:
 
-- 📄 **Ingestão inteligente** de documentos PDF
-- 🔍 **Busca semântica** com embeddings vetoriais  
-- 💬 **Chat contextual** usando Google Gemini AI
-- 🎯 **Respostas precisas** baseadas apenas no conteúdo fornecido
+- Ingestão de documentos PDF
+- Busca semântica através de embeddings vetoriais
+- Chat contextual usando Google Gemini API
+- Respostas baseadas exclusivamente no conteúdo fornecido
 
-## 🏗️ Stack Tecnológica
+## Stack Tecnológica
 
 ### **Backend**
 - **FastAPI** - Framework web moderno e rápido
@@ -29,7 +29,7 @@ O **RAGBot** é um sistema completo de chat inteligente que processa documentos 
 - **pgvector** - Extensão para operações vetoriais
 - **Docker Compose** - Orquestração de containers
 
-### **Inteligência artificial**
+### **Inteligência Artificial**
 - **sentence-transformers** - Geração de embeddings (all-MiniLM-L6-v2)  
 - **Google Gemini AI** - Modelo de linguagem para geração de respostas
 
@@ -38,7 +38,7 @@ O **RAGBot** é um sistema completo de chat inteligente que processa documentos 
 - **pytest** - Testes automatizados
 - **Swagger** - Documentação da API
 
-## 📁 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 backend/
@@ -76,31 +76,28 @@ backend/
     └── ingest.py       # Script de ingestão de PDFs
 ```
 
-## 🚀 Instalação e Configuração
+## Instalação e Configuração
 
-### **Pré-requisitos**
+### Pré-requisitos
 
-Antes de começar, certifique-se de ter instalado:
+- Python 3.11 (obrigatório - não use 3.12 ou 3.13) - [Download](https://www.python.org/downloads/release/python-3118/)
+- Docker & Docker Compose - [Instrução de instalação](https://docs.docker.com/get-docker/)
+- Google Gemini API Key - [Obter aqui](https://ai.google.dev/)
 
-- 🐍 **Python 3.11** (OBRIGATÓRIO - não use 3.12 ou 3.13) - [Download aqui](https://www.python.org/downloads/release/python-3118/)
-- 🐳 **Docker & Docker Compose** - [Instalar Docker](https://docs.docker.com/get-docker/)
-- 🔑 **Google Gemini API Key** - [Obter aqui](https://ai.google.dev/)
-
-### **1️⃣ Clonar o Repositório**
+### 1. Clonar o Repositório
 
 ```bash
 git clone <https://github.com/TCC-RagBot/RagBot-Back.git>
 cd RagBot-Back
 ```
 
-### **2️⃣ Configurar Ambiente Virtual**
+### 2. Configurar Ambiente Virtual
 
 ```bash
-# IMPORTANTE: Use Python 3.11 (não 3.12 ou 3.13)
-# Verificar versão primeiro:
-python --version  # Deve mostrar Python 3.11.x
+# Verificar versão do Python
+python --version
 
-# Criar ambiente virtual com Python 3.11
+# Criar ambiente virtual
 python -m venv venv
 
 # Ativar ambiente virtual
@@ -110,150 +107,122 @@ python -m venv venv
 venv\Scripts\activate.bat
 # Linux/Mac:
 source venv/bin/activate
-
-# Verificar se está ativo (deve aparecer (venv) no prompt)
-python --version  # Deve mostrar Python 3.11+
 ```
 
-### **3️⃣ Instalar Dependências**
+### 3. Instalar Dependências
 
 ```bash
-# Atualizar pip para a versão mais recente
+# Atualizar pip
 python -m pip install --upgrade pip
 
-# IMPORTANTE: Se você estiver usando Python 3.12+ e receber erro de compilação do NumPy:
-# Desinstale o ambiente atual e recrie com Python 3.11
-
-# Instalar todas as dependências do projeto
+# Instalar dependências
 pip install -r requirements.txt
-
-# Verificar instalação (deve listar ~88 pacotes)
-pip list
 ```
 
-### **4️⃣ Configurar Variáveis de Ambiente**
+### 4. Configurar Variáveis de Ambiente
 
 ```bash
 # Copiar arquivo de exemplo
-# Windows:
-copy .env.example .env
-# Linux/Mac:
-cp .env.example .env
+copy .env.example .env  # Windows
+cp .env.example .env    # Linux/Mac
 ```
 
-**Editar arquivo `.env`** com suas configurações:
+Editar o arquivo `.env` com suas configurações:
 
-### **5️⃣ Configurar Banco de Dados**
+### 5. Configurar Banco de Dados
 
 ```bash
-# Subir PostgreSQL com Docker Compose
+# Iniciar banco de dados com Docker Compose
 docker-compose up -d
 
-# Verificar se está rodando
+# Verificar containers
 docker ps
-
 ```
 
-O banco será inicializado automaticamente com:
-- ✅ PostgreSQL 15
-- ✅ Extensão pgvector
-- ✅ Schema completo (tabelas documents, chunks, etc.)
-- ✅ Usuário: `tccrag` / Senha: `tcc123` / DB: `ragbot_db`
+O banco será inicializado automaticamente com PostgreSQL 15, extensão pgvector e schema completo.
 
-## 🎮 Como Usar
+Credenciais padrão:
+- Usuário: `tccrag`
+- Senha: `tcc123`
+- Banco de dados: `ragbot_db`
 
-### **6️⃣ Iniciar a API**
+## Como Usar
+
+### 6. Iniciar a API
 
 ```bash
-# IMPORTANTE: Certifique-se de que o ambiente virtual está ativo!
-
-# Método 1: Execução direta (RECOMENDADO)
+# Iniciar a API
 python -m app.main
-
 ```
 
-✅ **API funcionando!** Acesse:
-- 🏠 **API Base**: http://localhost:8000
-- 📚 **Documentação Swagger**: http://localhost:8000/docs  
-- 📖 **ReDoc**: http://localhost:8000/redoc
-- ❤️ **Health Check**: http://localhost:8000/health
+API disponível em:
+- Base: http://localhost:8000
+- Swagger: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+- Health: http://localhost:8000/health
 
-### **7️⃣ Testar Conexões**
+### 7. Testar Conexões
 
 ```bash
-# Testar health check (deve retornar status: healthy)
+# Testar health check
 curl http://localhost:8000/health
-
-# Ou acesse no navegador: http://localhost:8000/health
 ```
 
-### **8️⃣ Ingerir Documentos (OBRIGATÓRIO para usar o chat)**
+### 8. Ingerir Documentos
+
+Antes de usar o chat, coloque os arquivos PDF na pasta `documents/` e execute:
 
 ```bash
-# Colocar PDFs na pasta documents/ e executar:
 python scripts/ingest.py "documents/seu-documento.pdf"
-
-# OU usando o executável do venv diretamente:
-.\venv\Scripts\python.exe scripts/ingest.py "documents/seu-documento.pdf"
 ```
 
-## 🧪 Executar Testes
+## Testes
 
-O projeto inclui uma suíte completa de testes automatizados para validar o funcionamento do sistema de ingestão de PDFs e geração de embeddings.
-
-### **Executar Todos os Testes**
+### Executar Todos os Testes
 
 ```bash
-# Modo básico - apenas resultados
+# Executar todos os testes
 python -m pytest tests/
 
-# Modo verboso - com detalhes dos testes
+# Modo verboso
 python -m pytest tests/ -v
 
-# Com prints dos testes visíveis (RECOMENDADO)
+# Modo verboso com saída do console
 python -m pytest tests/ -v -s
 ```
 
-### **Executar Teste Específico**
+### Executar Teste Específico
 
 ```bash
-# Teste completo end-to-end (RECOMENDADO para validação geral)
+# Teste end-to-end de ingestão
 python -m pytest tests/test_ingestion.py::TestPDFIngestion::test_end_to_end_ingestion_flow -v -s
 
-# Teste de carregamento de PDF apenas
+# Teste de carregamento de PDF
 python -m pytest tests/test_ingestion.py::TestPDFIngestion::test_pdf_loading_with_pypdf -v -s
 ```
 
-### **Saída Esperada dos Testes** 
+### Saída Esperada
 
-Quando tudo está funcionando corretamente, você verá:
+Saída bem-sucedida dos testes:
 
 ```
-✅ PDF carregado com sucesso: 1 páginas, 3219 caracteres totais
-✅ Documento dividido em 4 chunks (tamanho médio: 912 chars)  
-✅ Embeddings gerados com sucesso: 3 vetores de 384D (valores: -0.141 a 0.152)
-✅ Persistência no banco mockada com sucesso
-
-🔄 Executando teste end-to-end do fluxo de ingestão...
-📄 Passo 1: Carregando PDF...
-✂️ Passo 2: Criando chunks...
-🧮 Passo 3: Gerando embeddings...
-✅ Teste end-to-end concluído com sucesso!
-📊 Resumo: 1 páginas → 4 chunks → pipeline completo!
+PDF carregado: 1 páginas, 3219 caracteres totais
+Documento dividido em 4 chunks (tamanho médio: 912 chars)  
+Embeddings gerados: 3 vetores de 384D
 
 ======================== 5 passed in 10.52s ========================
 ```
 
-### **Pré-requisitos para Testes**
+### Pré-requisitos para Testes
 
-- ✅ Ambiente virtual ativo
-- ✅ Dependências instaladas (`pip install -r requirements.txt`)  
-- ✅ Arquivo `pdf-test.pdf` na raiz do projeto (incluído no repositório)
+- Ambiente virtual ativo
+- Dependências instaladas
+- Arquivo `pdf-test.pdf` na raiz do projeto
 
-📚 **Documentação completa dos testes**: Veja [`tests/README.md`](./tests/README.md) para informações detalhadas.
+Ver [tests/README.md](./tests/README.md) para documentação completa.
 
-## 📄 Licença
+## Licença
 
-Projeto desenvolvido para o **TCC de Engenharia de Software**.
+Projeto desenvolvido como TCC de Engenharia de Software.
 
 ---
