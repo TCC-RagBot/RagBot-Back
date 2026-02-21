@@ -5,9 +5,9 @@ services:
     image: pgvector/pgvector:pg16
     container_name: ragbot_db
     environment:
-      POSTGRES_DB: ragbot_db
-      POSTGRES_USER: tccrag
-      POSTGRES_PASSWORD: tcc123
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - "5433:5432"
     volumes:
