@@ -18,25 +18,23 @@ RAGBot é um sistema de chat que processa documentos PDF e responde perguntas co
 
 ## Stack Tecnológica
 
-### **Backend**
-- **FastAPI** - Framework web moderno e rápido
-- **Python 3.11+** - Linguagem principal
-- **LangChain** - Orquestração de IA e processamento de documentos
-- **Pydantic** - Validação de dados e configurações
+### Backend
+- FastAPI - Framework web
+- Python 3.11+
+- LangChain - Orquestração de IA e processamento de documentos
+- Pydantic - Validação de dados
 
-### **Banco de Dados**
-- **PostgreSQL 15+** - Banco de dados principal
-- **pgvector** - Extensão para operações vetoriais
-- **Docker Compose** - Orquestração de containers
+### Banco de Dados
+- PostgreSQL 16 - Banco de dados
+- pgvector - Extensão para operações vetoriais
 
-### **Inteligência Artificial**
-- **sentence-transformers** - Geração de embeddings (all-MiniLM-L6-v2)  
-- **Google Gemini AI** - Modelo de linguagem para geração de respostas
+### Inteligência Artificial
+- sentence-transformers - Geração de embeddings (all-MiniLM-L6-v2)
+- Google Gemini API - Modelo de linguagem para respostas
 
-### **DevOps & Qualidade**
-- **Docker** - Containerização
-- **pytest** - Testes automatizados
-- **Swagger** - Documentação da API
+### DevOps
+- Docker & Docker Compose - Containerização e orquestração
+- pytest - Testes automatizados
 
 ## Estrutura do Projeto
 
@@ -76,12 +74,20 @@ backend/
     └── ingest.py       # Script de ingestão de PDFs
 ```
 
-## Instalação e Configuração
+## Arquitetura
+
+O projeto é totalmente containerizado com Docker Compose. Dois containers são orquestrados:
+
+1. **ragbot_db** - PostgreSQL 16 com extensão pgvector
+2. **ragbot_backend** - API FastAPI (Python 3.11)
+
+Os containers se comunicam internamente pela rede Docker. O banco é inicializado automaticamente com o schema definido em `db/init.sql`.
+
+## Instalação e Execução
 
 ### Pré-requisitos
 
-- Python 3.11 (obrigatório - não use 3.12 ou 3.13) - [Download](https://www.python.org/downloads/release/python-3118/)
-- Docker & Docker Compose - [Instrução de instalação](https://docs.docker.com/get-docker/)
+- Docker & Docker Compose - [Instalação](https://docs.docker.com/get-docker/)
 - Google Gemini API Key - [Obter aqui](https://ai.google.dev/)
 
 ### 1. Clonar o Repositório
@@ -91,35 +97,7 @@ git clone <https://github.com/TCC-RagBot/RagBot-Back.git>
 cd RagBot-Back
 ```
 
-### 2. Configurar Ambiente Virtual
-
-```bash
-# Verificar versão do Python
-python --version
-
-# Criar ambiente virtual
-python -m venv venv
-
-# Ativar ambiente virtual
-# Windows (PowerShell):
-.\venv\Scripts\Activate.ps1
-# Windows (CMD):
-venv\Scripts\activate.bat
-# Linux/Mac:
-source venv/bin/activate
-```
-
-### 3. Instalar Dependências
-
-```bash
-# Atualizar pip
-python -m pip install --upgrade pip
-
-# Instalar dependências
-pip install -r requirements.txt
-```
-
-### 4. Configurar Variáveis de Ambiente
+### 2. Configurar Variáveis de Ambiente
 
 ```bash
 # Copiar arquivo de exemplo
@@ -127,99 +105,86 @@ copy .env.example .env  # Windows
 cp .env.example .env    # Linux/Mac
 ```
 
-Editar o arquivo `.env` com suas configurações:
+Editar o arquivo `.env` e preencher:
+- `GEMINI_API_KEY` - Sua chave de API do Google Gemini
+- As demais variáveis já possuem valores padrão configurados
 
-### 5. Configurar Banco de Dados
+### 3. Iniciar com Docker Compose
 
 ```bash
-# Iniciar banco de dados com Docker Compose
-docker-compose up -d
-
-# Verificar containers
-docker ps
+# Iniciar todos os containers
+docker compose up
 ```
 
-O banco será inicializado automaticamente com PostgreSQL 15, extensão pgvector e schema completo.
+Os containers iniciarão automaticamente:
+- PostgreSQL estará pronto na porta 5433 (interno: 5432)
+- API FastAPI estará acessível em http://localhost:8000
 
-Credenciais padrão:
-- Usuário: `tccrag`
-- Senha: `tcc123`
-- Banco de dados: `ragbot_db`
+Acesse:
+- Swagger: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+- Health Check: http://localhost:8000/health
 
-## Como Usar
+### 4. Ingerir Documentos
 
-### 6. Iniciar a API
+Coloque os arquivos PDF na pasta `documents/` e execute dentro do container backend:
 
 ```bash
-# Iniciar a API
+# Lista o container em execução
+docker compose ps
+
+# Executa ingestão dentro do container
+docker compose exec ragbot_backend python scripts/ingest.py "documents/seu-documento.pdf"
+```
+
+## Desenvolvimento Local
+
+Para desenvolver localmente sem Docker:
+
+```bash
+# Criar ambiente virtual
+python -m venv venv
+
+# Ativar (Windows PowerShell)
+.\venv\Scripts\Activate.ps1
+
+# Instalar dependências
+pip install -r requirements.txt
+
+# Iniciar API
 python -m app.main
 ```
 
-API disponível em:
-- Base: http://localhost:8000
-- Swagger: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
-- Health: http://localhost:8000/health
-
-### 7. Testar Conexões
+O banco de dados deve estar rodando em Docker:
 
 ```bash
-# Testar health check
-curl http://localhost:8000/health
-```
-
-### 8. Ingerir Documentos
-
-Antes de usar o chat, coloque os arquivos PDF na pasta `documents/` e execute:
-
-```bash
-python scripts/ingest.py "documents/seu-documento.pdf"
+docker compose up db
 ```
 
 ## Testes
 
-### Executar Todos os Testes
-
 ```bash
-# Executar todos os testes
-python -m pytest tests/
-
-# Modo verboso
+# Executar todos os testes (dentro do ambiente virtual)
 python -m pytest tests/ -v
 
-# Modo verboso com saída do console
-python -m pytest tests/ -v -s
-```
-
-### Executar Teste Específico
-
-```bash
-# Teste end-to-end de ingestão
+# Teste específico
 python -m pytest tests/test_ingestion.py::TestPDFIngestion::test_end_to_end_ingestion_flow -v -s
-
-# Teste de carregamento de PDF
-python -m pytest tests/test_ingestion.py::TestPDFIngestion::test_pdf_loading_with_pypdf -v -s
 ```
-
-### Saída Esperada
-
-Saída bem-sucedida dos testes:
-
-```
-PDF carregado: 1 páginas, 3219 caracteres totais
-Documento dividido em 4 chunks (tamanho médio: 912 chars)  
-Embeddings gerados: 3 vetores de 384D
-
-======================== 5 passed in 10.52s ========================
-```
-
-### Pré-requisitos para Testes
-
-- Ambiente virtual ativo
-- Dependências instaladas
-- Arquivo `pdf-test.pdf` na raiz do projeto
 
 Ver [tests/README.md](./tests/README.md) para documentação completa.
+
+## Parar os Containers
+
+```bash
+# Parar containers mantendo volumes de dados
+docker compose stop
+
+# Remover containers (dados persistem nos volumes)
+docker compose down
+
+# Remover tudo incluindo volumes (apaga dados do banco)
+docker compose down -v
+```
 
 ## Licença
 
