@@ -28,6 +28,9 @@ services:
     ports:
       - "8000:8000"
     volumes:
+      - ./app:/app/app
+      - ./db:/app/db
+      - ./scripts:/app/scripts
       - ./documents:/app/documents
     depends_on:
       db:
