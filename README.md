@@ -109,7 +109,7 @@ Editar o arquivo `.env` e preencher:
 - `GEMINI_API_KEY` - Sua chave de API do Google Gemini
 - As demais variáveis já possuem valores padrão configurados
 
-### 3. Iniciar com Docker Compose
+### 3. Iniciar com Docker
 
 ```bash
 # Iniciar todos os containers
@@ -125,21 +125,13 @@ Acesse:
 - ReDoc: http://localhost:8000/redoc
 - Health Check: http://localhost:8000/health
 
-### 4. Ingerir Documentos
+### Desenvolvimento Local sem Docker
 
-Coloque os arquivos PDF na pasta `documents/` e execute dentro do container backend:
+O banco de dados deve estar rodando em Docker:
 
 ```bash
-# Lista o container em execução
-docker compose ps
-
-# Executa ingestão dentro do container
-docker compose exec ragbot_backend python scripts/ingest.py "documents/seu-documento.pdf"
+docker compose up db
 ```
-
-## Desenvolvimento Local
-
-Para desenvolver localmente sem Docker:
 
 ```bash
 # Criar ambiente virtual
@@ -155,23 +147,25 @@ pip install -r requirements.txt
 python -m app.main
 ```
 
-O banco de dados deve estar rodando em Docker:
+### 4. Ingerir Documentos
+
+Coloque os arquivos PDF na pasta `documents/` e execute dentro do container backend:
 
 ```bash
-docker compose up db
+# Executa ingestão dentro do container
+docker compose exec backend python scripts/ingest.py "documents/seu-documento.pdf"
 ```
 
 ## Testes
 
 ```bash
-# Executar todos os testes (dentro do ambiente virtual)
+#Executar testes no Container
+docker compose exec backend pytest tests/ -v
+
+# Executar todos os testes no ambiente virtual
 python -m pytest tests/ -v
 
-# Teste específico
-python -m pytest tests/test_ingestion.py::TestPDFIngestion::test_end_to_end_ingestion_flow -v -s
 ```
-
-Ver [tests/README.md](./tests/README.md) para documentação completa.
 
 ## Parar os Containers
 
