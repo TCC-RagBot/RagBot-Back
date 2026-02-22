@@ -116,14 +116,21 @@ class TestPDFIngestion:
         
         print(f"✅ Embeddings gerados com sucesso: {len(embeddings)} vetores de 384D (valores: {min_val:.3f} a {max_val:.3f})")
     
+    @patch('scripts.ingest.DocumentRepository')
     @patch('app.repositories.vector_repository.LangChainVectorStore')
-    def test_database_persistence_mock(self, mock_vector_store_class, test_pdf_path):
+    def test_database_persistence_mock(self, mock_vector_store_class, mock_doc_repo_class, test_pdf_path):
         """
         Teste 4: Verificar se os dados são enviados para o banco (usando mock)
         """
-        # Configurar mock
+        # Configurar mock do vector store
         mock_vector_store_instance = MagicMock()
         mock_vector_store_class.return_value.vector_store = mock_vector_store_instance
+        
+        # Configurar mock do document repository
+        mock_doc_repo = MagicMock()
+        mock_doc_repo.document_exists.return_value = False
+        mock_doc_repo.save_document_metadata.return_value = MagicMock()
+        mock_doc_repo_class.return_value = mock_doc_repo
         
         # Simular o fluxo de ingestão
         from scripts.ingest import ingest_pdf
@@ -139,7 +146,10 @@ class TestPDFIngestion:
         assert isinstance(call_args, list), "add_documents deve ser chamado com uma lista"
         assert len(call_args) > 0, "Lista de documentos não pode estar vazia"
         
-        print("✅ Persistência no banco mockada com sucesso")
+        # Verificar se os metadados do documento foram salvos
+        mock_doc_repo.save_document_metadata.assert_called_once()
+        
+        print("Persistencia no banco mockada com sucesso")
     
     def test_end_to_end_ingestion_flow(self, test_pdf_path):
         """
